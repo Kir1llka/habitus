@@ -8,6 +8,10 @@ server:
 spring:
   application:
     name: habitus
+  security:
+    user:
+      name: admin
+      password: admin
   datasource:
     url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
