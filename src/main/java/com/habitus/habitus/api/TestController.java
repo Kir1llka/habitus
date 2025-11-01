@@ -1,10 +1,10 @@
-package com.habitus.habitus.api.controller;
+package com.habitus.habitus.api;
 
-import com.habitus.habitus.api.Convector;
-import com.habitus.habitus.api.GroupData;
+import com.habitus.habitus.api.records.Convector;
+import com.habitus.habitus.api.records.data.GroupData;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.security.UserRepository;
-import com.habitus.habitus.service.HabitService;
+import com.habitus.habitus.service.RecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,7 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TestController {
     private UserRepository userRepository;
-    private HabitService habitService;
+    private RecordService recordService;
 
     @Operation(summary = "Просто пинг сервера")
     @GetMapping()
@@ -48,7 +48,7 @@ public class TestController {
             LocalDate endDate
     ) {
         var user = userRepository.findById(1L).orElseThrow();
-        return habitService.getRecordsBetweenDates(user, startDate, endDate).stream()
+        return recordService.getRecordsBetweenDates(user, startDate, endDate).stream()
                 .map(Convector::toGroupData)
                 .toList();
     }

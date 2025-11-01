@@ -1,5 +1,8 @@
-package com.habitus.habitus.api;
+package com.habitus.habitus.api.records;
 
+import com.habitus.habitus.api.records.data.GroupData;
+import com.habitus.habitus.api.records.data.HabitData;
+import com.habitus.habitus.api.records.data.RecordData;
 import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitGroup;
 import com.habitus.habitus.repository.entity.RecordInfo;

@@ -1,5 +1,6 @@
-package com.habitus.habitus.api;
+package com.habitus.habitus.api.group;
 
+import com.habitus.habitus.api.habits.HabitData;
 import lombok.Builder;
 import lombok.Data;
 

@@ -34,5 +34,6 @@ logging:
 
 springdoc:
   swagger-ui:
+#    disable-swagger-default-url: true
     operationsSorter: method     # или alpha, method, none
     tagsSorter: alpha            # или alpha, none

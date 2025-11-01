@@ -28,7 +28,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("api/test/**").permitAll()
                         .requestMatchers("swagger-ui/**").permitAll()
-                        .requestMatchers("api/habitus/**").authenticated()
                         .anyRequest().authenticated())
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                 .build();

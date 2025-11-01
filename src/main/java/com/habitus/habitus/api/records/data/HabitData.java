@@ -1,4 +1,4 @@
-package com.habitus.habitus.api;
+package com.habitus.habitus.api.records.data;
 
 import lombok.Builder;
 import lombok.Data;
