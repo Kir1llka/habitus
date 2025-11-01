@@ -26,6 +26,12 @@ spring:
       enabled: true
       path: /h2-console
 
+logging:
+  level:
+    org:
+      springframework:
+        security: WARN
+
 springdoc:
   swagger-ui:
     operationsSorter: method     # или alpha, method, none

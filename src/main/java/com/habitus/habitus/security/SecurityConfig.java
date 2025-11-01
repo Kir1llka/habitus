@@ -19,7 +19,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new MyUserDetailsService();
+        return new UserDetailsServiceImpl();
     }
 
     @Bean
@@ -27,7 +27,9 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("api/test/**").permitAll()
-                        .requestMatchers("api/habitus/**").authenticated())
+                        .requestMatchers("swagger-ui/**").permitAll()
+                        .requestMatchers("api/habitus/**").authenticated()
+                        .anyRequest().authenticated())
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                 .build();
     }

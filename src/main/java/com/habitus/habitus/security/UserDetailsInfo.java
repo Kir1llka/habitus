@@ -4,20 +4,25 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class MyUserDetails implements UserDetails {
-    private final MyUser user;
+public class UserDetailsInfo implements UserDetails {
+    private final UserInfo user;
 
-    public MyUserDetails(MyUser user){
+    public UserDetailsInfo(UserInfo user){
         this.user = user;
+    }
+
+    public UserInfo getUser() {
+        return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(user.getRoles().split(", "))
+        return user.getRoles().stream()
+                .map(Objects::toString)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
