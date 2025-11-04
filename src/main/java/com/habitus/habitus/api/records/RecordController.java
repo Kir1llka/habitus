@@ -1,5 +1,6 @@
 package com.habitus.habitus.api.records;
 
+import com.habitus.habitus.api.records.data.DayData;
 import com.habitus.habitus.api.records.data.GroupData;
 import com.habitus.habitus.api.records.data.PutRecordBody;
 import com.habitus.habitus.security.UserDetailsInfo;
@@ -40,8 +41,25 @@ public class RecordController {
             LocalDate endDate
     ) {
         return recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate).stream()
-                .map(Convector::toGroupData)
+                .map(group -> Convector.toGroupData(group, startDate, endDate))
                 .toList();
+    }
+
+    @Operation(summary = "Получить дни с записями")
+    @GetMapping("/days")
+    public List<DayData> getDays(
+            @AuthenticationPrincipal
+            UserDetailsInfo userDetails,
+
+            @RequestParam("startDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate startDate,
+
+            @RequestParam("endDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate endDate
+    ) {
+        return Convector.toDayDataList(recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate), startDate, endDate);
     }
 
     @Operation(summary = "Добавить/обновить запись привычки за конкретную дату")

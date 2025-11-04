@@ -2,6 +2,7 @@ package com.habitus.habitus.api;
 
 import com.habitus.habitus.api.records.Convector;
 import com.habitus.habitus.api.records.data.GroupData;
+import com.habitus.habitus.repository.entity.HabitGroup;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.security.UserRepository;
 import com.habitus.habitus.service.RecordService;
@@ -49,7 +50,7 @@ public class TestController {
     ) {
         var user = userRepository.findById(1L).orElseThrow();
         return recordService.getRecordsBetweenDates(user, startDate, endDate).stream()
-                .map(Convector::toGroupData)
+                .map((HabitGroup group) -> Convector.toGroupData(group, startDate, endDate))
                 .toList();
     }
 }
