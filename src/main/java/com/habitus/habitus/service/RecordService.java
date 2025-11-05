@@ -6,8 +6,10 @@ import com.habitus.habitus.repository.HabitRepository;
 import com.habitus.habitus.repository.RecordRepository;
 import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitGroup;
+import com.habitus.habitus.repository.entity.HabitType;
 import com.habitus.habitus.repository.entity.RecordId;
 import com.habitus.habitus.repository.entity.RecordInfo;
+import com.habitus.habitus.repository.entity.UserSettings;
 import com.habitus.habitus.security.Role;
 import com.habitus.habitus.security.UserDetailsServiceImpl;
 import com.habitus.habitus.security.UserInfo;
@@ -29,8 +31,13 @@ public class RecordService {
     private HabitRepository habitRepository;
     private RecordRepository recordRepository;
 
-    public List<HabitGroup> getRecordsBetweenDates(UserInfo user, LocalDate startDate, LocalDate endDate) {
-        List<HabitGroup> groups = habitGroupRepository.findByOwner(user);
+    public List<HabitGroup> getRecordsBetweenDates(UserInfo user, LocalDate startDate, LocalDate endDate, boolean showHidden) {
+        List<HabitGroup> groups = habitGroupRepository.findByOwner(user)
+                .stream()
+                .filter(g -> showHidden || !g.isHidden())
+                .toList();
+
+        groups.forEach(g -> g.setHabits(g.getHabits().stream().filter(h -> showHidden || !h.isHidden()).toList()));
 
         groups.stream()
                 .flatMap(g -> g.getHabits().stream())
@@ -67,6 +74,7 @@ public class RecordService {
         admin.setName("admin");
         admin.setPassword("admin");
         admin.setRoles(Set.of(Role.ADMIN));
+        admin.setSettings(UserSettings.builder().user(admin).build());
 
         userDetailsService.addUser(admin);
 
@@ -82,7 +90,7 @@ public class RecordService {
         for (int i = 1; i <= 3; i++) {
             Habit habit = new Habit();
             habit.setName("Привычка " + i);
-            habit.setType("обычная");
+            habit.setType(HabitType.GENERAL);
             habit.setGroup(group);
             habitRepository.save(habit);
             habits.add(habit);

@@ -41,6 +41,7 @@ public class Convector {
                 .id(habit.getId())
                 .name(habit.getName())
                 .type(habit.getType())
+                .hidden(habit.isHidden())
                 .records(records)
                 .build();
     }
@@ -50,6 +51,8 @@ public class Convector {
                 .id(group.getId())
                 .name(group.getName())
                 .color(group.getColor())
+                .hidden(group.isHidden())
+                .minimized(group.isMinimized())
                 .habits(group.getHabits().stream()
                         .map((Habit habit) -> toHabitData(habit, startDate, endDate))
                         .toList())

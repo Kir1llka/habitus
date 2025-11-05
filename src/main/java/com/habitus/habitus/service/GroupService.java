@@ -1,5 +1,6 @@
 package com.habitus.habitus.service;
 
+import com.habitus.habitus.api.group.ConfigureGroupData;
 import com.habitus.habitus.api.group.NewGroupData;
 import com.habitus.habitus.repository.HabitGroupRepository;
 import com.habitus.habitus.repository.entity.HabitGroup;
@@ -29,6 +30,17 @@ public class GroupService {
                 .color(data.getColor())
                 .owner(user)
                 .build();
+        repository.save(group);
+    }
+
+    public void configureGroup(ConfigureGroupData data) {
+        var group = getGroup(data.getGroupId());
+
+        if (!data.getName().isEmpty()) group.setName(data.getName());
+        if (!data.getColor().isEmpty()) group.setColor(data.getColor());
+        if (data.getHidden() != null) group.setHidden(data.getHidden());
+        if (data.getMinimized() != null) group.setMinimized(data.getMinimized());
+
         repository.save(group);
     }
 

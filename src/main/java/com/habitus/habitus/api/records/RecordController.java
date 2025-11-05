@@ -6,6 +6,7 @@ import com.habitus.habitus.api.records.data.PutRecordBody;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.service.RecordService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,9 +27,9 @@ public class RecordController {
 
     private RecordService recordService;
 
-    @Operation(summary = "Получить группу привычек со всеми записями в диапазоне дат")
+    @Operation(summary = "Получить все группы привычек со всеми записями в диапазоне дат")
     @GetMapping()
-    public List<GroupData> getGroupsWithHabitsAndRecords(
+    public List<GroupData> getGroups(
             @AuthenticationPrincipal
             UserDetailsInfo userDetails,
 
@@ -40,7 +41,7 @@ public class RecordController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate
     ) {
-        return recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate).stream()
+        return recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate, userDetails.getUser().getSettings().isShowHidden()).stream()
                 .map(group -> Convector.toGroupData(group, startDate, endDate))
                 .toList();
     }
@@ -59,7 +60,7 @@ public class RecordController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate
     ) {
-        return Convector.toDayDataList(recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate), startDate, endDate);
+        return Convector.toDayDataList(recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate, userDetails.getUser().getSettings().isShowHidden()), startDate, endDate);
     }
 
     @Operation(summary = "Добавить/обновить запись привычки за конкретную дату")
@@ -68,7 +69,7 @@ public class RecordController {
             @AuthenticationPrincipal
             UserDetailsInfo userDetails,
 
-            @RequestBody PutRecordBody body
+            @Valid @RequestBody PutRecordBody body
     ) {
         recordService.putRecord(userDetails.getUser(), body);
     }

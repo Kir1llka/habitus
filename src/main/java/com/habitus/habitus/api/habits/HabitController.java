@@ -1,6 +1,8 @@
 package com.habitus.habitus.api.habits;
 
 import com.habitus.habitus.service.HabitService;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ public class HabitController {
 
     private HabitService service;
 
+    @Operation(summary = "Получить инфо о привычке")
     @GetMapping("/{id}")
     public HabitData getHabit(@PathVariable Long id) {
         var habit = service.getHabit(id);
@@ -24,14 +27,23 @@ public class HabitController {
                 .id(habit.getId())
                 .name(habit.getName())
                 .type(habit.getType())
+                .hidden(habit.isHidden())
                 .build();
     }
 
+    @Operation(summary = "Добавить новую привычку")
     @PostMapping()
-    public void addHabit(@RequestBody NewHabitData data) {
+    public void addHabit(@Valid @RequestBody NewHabitData data) {
         service.addHabit(data);
     }
 
+    @Operation(summary = "Изменить параметры привычки")
+    @PostMapping("/configure")
+    public void configureHabit(@Valid @RequestBody ConfigureHabitData data) {
+        service.configureHabit(data);
+    }
+
+    @Operation(summary = "Удалить привычку")
     @DeleteMapping("/{id}")
     public void deleteHabit(@PathVariable Long id) {
         service.deleteHabit(id);

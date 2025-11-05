@@ -7,4 +7,5 @@ public class NewHabitData {
     private Long groupId;
     private String name;
     private String type;
+    private boolean hidden;
 }

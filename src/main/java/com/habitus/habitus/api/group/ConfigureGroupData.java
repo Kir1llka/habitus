@@ -1,12 +1,12 @@
 package com.habitus.habitus.api.group;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
-public class GroupShortData {
-    private Long id;
+public class ConfigureGroupData {
+    private Long groupId;
     private String name;
     private String color;
+    private Boolean hidden;
+    private Boolean minimized;
 }

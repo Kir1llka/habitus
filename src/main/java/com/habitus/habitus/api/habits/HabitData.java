@@ -1,5 +1,6 @@
 package com.habitus.habitus.api.habits;
 
+import com.habitus.habitus.repository.entity.HabitType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,5 +9,6 @@ import lombok.Data;
 public class HabitData {
     private Long id;
     private String name;
-    private String type;
+    private HabitType type;
+    private boolean hidden;
 }

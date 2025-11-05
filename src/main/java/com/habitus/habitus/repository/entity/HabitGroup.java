@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "habit_groups", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"name"})
-})
+@Table(name = "habit_groups")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,21 +20,19 @@ public class HabitGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Уникальное имя группы привычек
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     private String color;
+    private boolean hidden;
+    private boolean minimized;
 
-    @JsonIgnore
-    // Владелец группы — пользователь
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private UserInfo owner;
 
-    // Список привычек в группе
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude

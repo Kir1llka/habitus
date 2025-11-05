@@ -49,7 +49,7 @@ public class TestController {
             LocalDate endDate
     ) {
         var user = userRepository.findById(1L).orElseThrow();
-        return recordService.getRecordsBetweenDates(user, startDate, endDate).stream()
+        return recordService.getRecordsBetweenDates(user, startDate, endDate, true).stream()
                 .map((HabitGroup group) -> Convector.toGroupData(group, startDate, endDate))
                 .toList();
     }

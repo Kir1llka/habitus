@@ -3,6 +3,8 @@ package com.habitus.habitus.api.group;
 import com.habitus.habitus.api.habits.HabitData;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.service.GroupService;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +24,7 @@ public class GroupController {
 
     private GroupService service;
 
+    @Operation(summary = "Получить инфо о всех группах и привычках в них")
     @GetMapping("/all")
     public List<GroupData> getAllGroups(
             @AuthenticationPrincipal
@@ -32,38 +35,60 @@ public class GroupController {
                         .id(group.getId())
                         .name(group.getName())
                         .color(group.getColor())
+                        .hidden(group.isHidden())
+                        .minimized(group.isMinimized())
                         .habits(group.getHabits().stream()
                                 .map(habit -> HabitData.builder()
                                         .id(habit.getId())
                                         .name(habit.getName())
                                         .type(habit.getType())
+                                        .hidden(habit.isHidden())
                                         .build())
                                 .toList())
                         .build())
                 .toList();
     }
 
+    @Operation(summary = "Получить инфо о группе и её привычках")
     @GetMapping("/{id}")
-    public GroupShortData getGroup(@PathVariable Long id) {
+    public GroupData getGroup(@PathVariable Long id) {
         var group = service.getGroup(id);
-        return GroupShortData.builder()
+        return GroupData.builder()
                 .id(group.getId())
                 .name(group.getName())
                 .color(group.getColor())
+                .hidden(group.isHidden())
+                .minimized(group.isMinimized())
+                .habits(group.getHabits().stream()
+                        .map(habit -> HabitData.builder()
+                                .id(habit.getId())
+                                .name(habit.getName())
+                                .type(habit.getType())
+                                .hidden(habit.isHidden())
+                                .build())
+                        .toList())
                 .build();
     }
 
+    @Operation(summary = "Добавить новую группу")
     @PostMapping()
     public void addGroup(
             @AuthenticationPrincipal
             UserDetailsInfo userDetails,
 
-            @RequestBody
+            @Valid @RequestBody
             NewGroupData data
     ) {
         service.addGroup(userDetails.getUser(), data);
     }
 
+    @Operation(summary = "Изменить параметры группы")
+    @PostMapping("/configure")
+    public void configureGroup(@Valid @RequestBody ConfigureGroupData data) {
+        service.configureGroup(data);
+    }
+
+    @Operation(summary = "Удалить группу (со всеми привычками)")
     @DeleteMapping("/{id}")
     public void deleteGroup(@PathVariable Long id) {
         service.deleteGroup(id);

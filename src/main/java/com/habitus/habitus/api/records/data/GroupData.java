@@ -11,5 +11,7 @@ public class GroupData {
     private Long id;
     private String name;
     private String color;
+    private boolean hidden;
+    private boolean minimized;
     private List<HabitData> habits;
 }
