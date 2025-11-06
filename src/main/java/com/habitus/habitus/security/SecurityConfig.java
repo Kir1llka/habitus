@@ -1,5 +1,7 @@
 package com.habitus.habitus.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -7,12 +9,15 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -38,8 +43,41 @@ public class SecurityConfig {
                         .requestMatchers("swagger-ui/**").permitAll()
                         .requestMatchers("v3/api-docs").permitAll()
                         .anyRequest().authenticated())
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
+                .formLogin(form -> form
+                        .loginProcessingUrl("/login")
+                        .successHandler(jsonAuthSuccessHandler())
+                        .failureHandler(jsonAuthFailureHandler())
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Forbidden\"}");
+                        })
+                )
                 .build();
+    }
+
+    public AuthenticationSuccessHandler jsonAuthSuccessHandler() {
+        return (HttpServletRequest request, HttpServletResponse response, Authentication auth) -> {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"success\":true}");
+        };
+    }
+
+    public AuthenticationFailureHandler jsonAuthFailureHandler() {
+        return (HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) -> {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"success\":false, \"error\":\"" + exception.getMessage() + "\"}");
+        };
     }
 
     @Bean
