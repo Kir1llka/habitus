@@ -1,5 +1,6 @@
 package com.habitus.habitus.api.settings;
 
+import com.habitus.habitus.api.Result;
 import com.habitus.habitus.repository.UserSettingsRepository;
 import com.habitus.habitus.security.UserDetailsInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,15 +22,15 @@ public class SettingsController {
 
     @Operation(summary = "Получить настройки пользователя")
     @GetMapping()
-    public UserSettingsData getSettings(@AuthenticationPrincipal UserDetailsInfo user) {
-        return UserSettingsData.builder()
+    public Result<UserSettingsData> getSettings(@AuthenticationPrincipal UserDetailsInfo user) {
+        return Result.ok(UserSettingsData.builder()
                 .showHidden(user.getUser().getSettings().isShowHidden())
-                .build();
+                .build());
     }
 
     @Operation(summary = "Изменить настройки пользователя")
     @PostMapping()
-    public void changeSettings(
+    public Result<Void> changeSettings(
             @AuthenticationPrincipal UserDetailsInfo user,
             @Valid @RequestBody UserSettingsRequestData data) {
         var settings = user.getUser().getSettings();
@@ -37,5 +38,6 @@ public class SettingsController {
         if (data.getShowHidden() != null) settings.setShowHidden(data.getShowHidden());
 
         repository.save(settings);
+        return Result.ok();
     }
 }

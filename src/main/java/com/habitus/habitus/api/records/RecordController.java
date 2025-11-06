@@ -1,5 +1,6 @@
 package com.habitus.habitus.api.records;
 
+import com.habitus.habitus.api.Result;
 import com.habitus.habitus.api.records.data.DayData;
 import com.habitus.habitus.api.records.data.GroupData;
 import com.habitus.habitus.api.records.data.PutRecordBody;
@@ -29,7 +30,7 @@ public class RecordController {
 
     @Operation(summary = "Получить все группы привычек со всеми записями в диапазоне дат")
     @GetMapping()
-    public List<GroupData> getGroups(
+    public Result<List<GroupData>> getGroups(
             @AuthenticationPrincipal
             UserDetailsInfo userDetails,
 
@@ -41,14 +42,14 @@ public class RecordController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate
     ) {
-        return recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate, userDetails.getUser().getSettings().isShowHidden()).stream()
+        return Result.ok(recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate, userDetails.getUser().getSettings().isShowHidden()).stream()
                 .map(group -> Convector.toGroupData(group, startDate, endDate))
-                .toList();
+                .toList());
     }
 
     @Operation(summary = "Получить дни с записями")
     @GetMapping("/days")
-    public List<DayData> getDays(
+    public Result<List<DayData>> getDays(
             @AuthenticationPrincipal
             UserDetailsInfo userDetails,
 
@@ -60,17 +61,18 @@ public class RecordController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate
     ) {
-        return Convector.toDayDataList(recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate, userDetails.getUser().getSettings().isShowHidden()), startDate, endDate);
+        return Result.ok(Convector.toDayDataList(recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate, userDetails.getUser().getSettings().isShowHidden()), startDate, endDate));
     }
 
     @Operation(summary = "Добавить/обновить запись привычки за конкретную дату")
     @PutMapping()
-    public void putRecord(
+    public Result<Void> putRecord(
             @AuthenticationPrincipal
             UserDetailsInfo userDetails,
 
             @Valid @RequestBody PutRecordBody body
     ) {
         recordService.putRecord(userDetails.getUser(), body);
+        return Result.ok();
     }
 }

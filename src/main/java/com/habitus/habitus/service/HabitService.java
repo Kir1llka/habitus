@@ -34,8 +34,12 @@ public class HabitService {
     public void configureHabit(ConfigureHabitData data) {
         var habit = getHabit(data.getHabitId());
 
-        if (!data.getName().isEmpty()) habit.setName(data.getName());
+        if (data.getName() != null && !data.getName().isEmpty()) habit.setName(data.getName());
         if (data.getHidden() != null) habit.setHidden(data.getHidden());
+        if (data.getGroupId() != null) {
+            habit.setGroup(groupRepository.findById(data.getGroupId()).orElseThrow());
+            repository.save(habit);
+        }
 
         repository.save(habit);
     }

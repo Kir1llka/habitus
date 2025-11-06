@@ -1,5 +1,6 @@
 package com.habitus.habitus.api.habits;
 
+import com.habitus.habitus.api.Result;
 import com.habitus.habitus.service.HabitService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -21,31 +22,34 @@ public class HabitController {
 
     @Operation(summary = "Получить инфо о привычке")
     @GetMapping("/{id}")
-    public HabitData getHabit(@PathVariable Long id) {
+    public Result<HabitData> getHabit(@PathVariable Long id) {
         var habit = service.getHabit(id);
-        return HabitData.builder()
+        return Result.ok(HabitData.builder()
                 .id(habit.getId())
                 .name(habit.getName())
                 .type(habit.getType())
                 .hidden(habit.isHidden())
-                .build();
+                .build());
     }
 
     @Operation(summary = "Добавить новую привычку")
     @PostMapping()
-    public void addHabit(@Valid @RequestBody NewHabitData data) {
+    public Result<Void> addHabit(@Valid @RequestBody NewHabitData data) {
         service.addHabit(data);
+        return Result.ok();
     }
 
     @Operation(summary = "Изменить параметры привычки")
     @PostMapping("/configure")
-    public void configureHabit(@Valid @RequestBody ConfigureHabitData data) {
+    public Result<Void> configureHabit(@Valid @RequestBody ConfigureHabitData data) {
         service.configureHabit(data);
+        return Result.ok();
     }
 
     @Operation(summary = "Удалить привычку")
     @DeleteMapping("/{id}")
-    public void deleteHabit(@PathVariable Long id) {
+    public Result<Void> deleteHabit(@PathVariable Long id) {
         service.deleteHabit(id);
+        return Result.ok();
     }
 }

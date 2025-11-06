@@ -1,5 +1,6 @@
 package com.habitus.habitus.api.group;
 
+import com.habitus.habitus.api.Result;
 import com.habitus.habitus.api.habits.HabitData;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.service.GroupService;
@@ -26,11 +27,11 @@ public class GroupController {
 
     @Operation(summary = "Получить инфо о всех группах и привычках в них")
     @GetMapping("/all")
-    public List<GroupData> getAllGroups(
+    public Result<List<GroupData>> getAllGroups(
             @AuthenticationPrincipal
             UserDetailsInfo userDetails
     ) {
-        return service.getAllGroups(userDetails.getUser()).stream()
+        return Result.ok(service.getAllGroups(userDetails.getUser()).stream()
                 .map(group -> GroupData.builder()
                         .id(group.getId())
                         .name(group.getName())
@@ -46,14 +47,14 @@ public class GroupController {
                                         .build())
                                 .toList())
                         .build())
-                .toList();
+                .toList());
     }
 
     @Operation(summary = "Получить инфо о группе и её привычках")
     @GetMapping("/{id}")
-    public GroupData getGroup(@PathVariable Long id) {
+    public Result<GroupData> getGroup(@PathVariable Long id) {
         var group = service.getGroup(id);
-        return GroupData.builder()
+        return Result.ok(GroupData.builder()
                 .id(group.getId())
                 .name(group.getName())
                 .color(group.getColor())
@@ -67,12 +68,12 @@ public class GroupController {
                                 .hidden(habit.isHidden())
                                 .build())
                         .toList())
-                .build();
+                .build());
     }
 
     @Operation(summary = "Добавить новую группу")
     @PostMapping()
-    public void addGroup(
+    public Result<Void> addGroup(
             @AuthenticationPrincipal
             UserDetailsInfo userDetails,
 
@@ -80,17 +81,20 @@ public class GroupController {
             NewGroupData data
     ) {
         service.addGroup(userDetails.getUser(), data);
+        return Result.ok();
     }
 
     @Operation(summary = "Изменить параметры группы")
     @PostMapping("/configure")
-    public void configureGroup(@Valid @RequestBody ConfigureGroupData data) {
+    public Result<Void> configureGroup(@Valid @RequestBody ConfigureGroupData data) {
         service.configureGroup(data);
+        return Result.ok();
     }
 
     @Operation(summary = "Удалить группу (со всеми привычками)")
     @DeleteMapping("/{id}")
-    public void deleteGroup(@PathVariable Long id) {
+    public Result<Void> deleteGroup(@PathVariable Long id) {
         service.deleteGroup(id);
+        return Result.ok();
     }
 }

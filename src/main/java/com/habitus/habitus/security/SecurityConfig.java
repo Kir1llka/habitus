@@ -52,12 +52,12 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                            response.getWriter().write("{\"meta\":{\"status\":\"ERROR\",\"description\":\"Unauthorized\"}}");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"Forbidden\"}");
+                            response.getWriter().write("{\"meta\":{\"status\":\"ERROR\",\"description\":\"Forbidden\"}}");
                         })
                 )
                 .build();
@@ -67,7 +67,7 @@ public class SecurityConfig {
         return (HttpServletRequest request, HttpServletResponse response, Authentication auth) -> {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("{\"success\":true}");
+            response.getWriter().write("{\"meta\":{\"status\":\"SUCCESS\"}}");
         };
     }
 
@@ -76,7 +76,7 @@ public class SecurityConfig {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"success\":false, \"error\":\"" + exception.getMessage() + "\"}");
+            response.getWriter().write("{\"meta\":{\"status\":\"ERROR\",\"description\":\"" + exception.getMessage() + "\"}}");
         };
     }
 
