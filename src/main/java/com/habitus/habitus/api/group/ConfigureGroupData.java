@@ -1,11 +1,13 @@
 package com.habitus.habitus.api.group;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 public class ConfigureGroupData {
+    @NotNull
     private Long groupId;
     private String name;
     private String color;
