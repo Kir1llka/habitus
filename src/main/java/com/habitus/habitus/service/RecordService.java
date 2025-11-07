@@ -1,6 +1,10 @@
 package com.habitus.habitus.service;
 
+import com.habitus.habitus.api.group.GroupData;
+import com.habitus.habitus.api.records.data.DayData;
+import com.habitus.habitus.api.records.data.DayRecordData;
 import com.habitus.habitus.api.records.data.PutRecordBody;
+import com.habitus.habitus.api.records.data.RecordData;
 import com.habitus.habitus.repository.HabitGroupRepository;
 import com.habitus.habitus.repository.HabitRepository;
 import com.habitus.habitus.repository.RecordRepository;
@@ -19,8 +23,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -31,13 +39,78 @@ public class RecordService {
     private HabitRepository habitRepository;
     private RecordRepository recordRepository;
 
-    public List<HabitGroup> getRecordsBetweenDates(UserInfo user, LocalDate startDate, LocalDate endDate, boolean showHidden) {
+    public List<GroupData> getGroupsData(UserInfo user, LocalDate startDate, LocalDate endDate) {
+        return getRecordsBetweenDates(user, startDate, endDate).stream()
+                .map(g -> getGroupData(g, startDate, endDate))
+                .toList();
+    }
+
+    private GroupData getGroupData(HabitGroup group, LocalDate startDate, LocalDate endDate) {
+        return GroupService.toGroupData(
+                group,
+                group.getHabits().stream()
+                        .map(h -> HabitService.toHabitData(h, getFullRecordsData(h, startDate, endDate)))
+                        .toList()
+        );
+    }
+
+    private static List<RecordData> getFullRecordsData(Habit habit, LocalDate startDate, LocalDate endDate) {
+        var map = habit.getRecords().stream()
+                .map(RecordService::toRecordData)
+                .collect(Collectors.toMap(RecordData::getDate, Function.identity()));
+        return Stream.iterate(
+                        startDate,
+                        date -> !date.isAfter(endDate),
+                        date -> date.plusDays(1)
+                )
+                .map(date -> map.getOrDefault(date, RecordData.builder().date(date).build()))
+                .collect(Collectors.toList());
+    }
+
+    private static RecordData toRecordData(RecordInfo recordInfo) {
+        return RecordData.builder()
+                .date(recordInfo.getId().getRecordDate())
+                .value(recordInfo.getPayload())
+                .build();
+    }
+
+    public List<DayData> getDaysData(UserInfo user, LocalDate startDate, LocalDate endDate) {
+        var groups = getRecordsBetweenDates(user, startDate, endDate);
+
+        List<DayData> result = new ArrayList<>();
+        var habits = groups.stream()
+                .flatMap(g -> g.getHabits().stream())
+                .toList();
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            var d = LocalDate.ofEpochDay(date.toEpochDay());
+            List<DayRecordData> recs = new ArrayList<>();
+            for (Habit habit : habits) {
+                var value = habit.getRecords().stream()
+                        .filter(r -> r.getId().getRecordDate().equals(d))
+                        .findFirst()
+                        .map(RecordInfo::getPayload)
+                        .orElse(null);
+                recs.add(DayRecordData.builder().habitId(habit.getId()).value(value).build());
+            }
+            result.add(new DayData(date, recs));
+        }
+
+        return result;
+    }
+
+    private List<HabitGroup> getRecordsBetweenDates(UserInfo user, LocalDate startDate, LocalDate endDate) {
+        var showHidden = user.getSettings().isShowHidden();
         List<HabitGroup> groups = habitGroupRepository.findByOwner(user)
                 .stream()
                 .filter(g -> showHidden || !g.isHidden())
+                .sorted(Comparator.comparing(HabitGroup::getPosition))
                 .toList();
 
-        groups.forEach(g -> g.setHabits(g.getHabits().stream().filter(h -> showHidden || !h.isHidden()).toList()));
+        groups.forEach(g -> g.setHabits(g.getHabits().stream()
+                .filter(h -> showHidden || !h.isHidden())
+                .sorted(Comparator.comparing(Habit::getPosition))
+                .toList()));
 
         groups.stream()
                 .flatMap(g -> g.getHabits().stream())
@@ -82,6 +155,7 @@ public class RecordService {
         HabitGroup group = new HabitGroup();
         group.setName("Мои привычки");
         group.setColor("#3498db");
+        group.setPosition(0);
         group.setOwner(admin);
         habitGroupRepository.save(group);
 
@@ -91,6 +165,7 @@ public class RecordService {
             Habit habit = new Habit();
             habit.setName("Привычка " + i);
             habit.setType(HabitType.GENERAL);
+            habit.setPosition(i-1);
             habit.setGroup(group);
             habitRepository.save(habit);
             habits.add(habit);

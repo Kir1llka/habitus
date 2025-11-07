@@ -23,13 +23,7 @@ public class HabitController {
     @Operation(summary = "Получить инфо о привычке")
     @GetMapping("/{id}")
     public Result<HabitData> getHabit(@PathVariable Long id) {
-        var habit = service.getHabit(id);
-        return Result.ok(HabitData.builder()
-                .id(habit.getId())
-                .name(habit.getName())
-                .type(habit.getType())
-                .hidden(habit.isHidden())
-                .build());
+        return Result.ok(service.getHabit(id));
     }
 
     @Operation(summary = "Добавить новую привычку")

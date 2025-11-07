@@ -1,13 +1,19 @@
 package com.habitus.habitus.service;
 
 import com.habitus.habitus.api.group.ConfigureGroupData;
+import com.habitus.habitus.api.group.GroupData;
 import com.habitus.habitus.api.group.NewGroupData;
+import com.habitus.habitus.api.habits.HabitData;
 import com.habitus.habitus.repository.HabitGroupRepository;
+import com.habitus.habitus.repository.HabitRepository;
+import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitGroup;
 import com.habitus.habitus.security.UserInfo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -15,36 +21,82 @@ import java.util.List;
 public class GroupService {
 
     private HabitGroupRepository repository;
+    private HabitRepository habitRepository;
 
-    public List<HabitGroup> getAllGroups(UserInfo user) {
-        return repository.findByOwner(user);
+    public List<GroupData> getAllGroups(UserInfo user) {
+        return repository.findByOwner(user).stream()
+                .map(group ->
+                        toGroupData(group, group.getHabits().stream()
+                                .sorted(Comparator.comparing(Habit::getPosition))
+                                .map(HabitService::toHabitData)
+                                .toList())
+                )
+                .sorted(Comparator.comparing(GroupData::getPosition))
+                .toList();
     }
 
-    public HabitGroup getGroup(Long id) {
-        return repository.findById(id).orElseThrow();
+    public GroupData getGroup(Long id) {
+        var group = repository.findById(id).orElseThrow();
+        return toGroupData(
+                group,
+                group.getHabits().stream()
+                        .sorted(Comparator.comparing(Habit::getPosition))
+                        .map(HabitService::toHabitData)
+                        .toList()
+        );
     }
 
     public void addGroup(UserInfo user, NewGroupData data) {
+        var groups = repository.findByOwner(user);
         var group = HabitGroup.builder()
                 .name(data.getName())
                 .color(data.getColor())
                 .owner(user)
+                .position(groups.size())
                 .build();
         repository.save(group);
     }
 
-    public void configureGroup(ConfigureGroupData data) {
-        var group = getGroup(data.getGroupId());
+    @Transactional
+    public void reorderGroups(UserInfo user, List<Long> orderedIds) {
+        var groups = repository.findByOwner(user);
+        if (orderedIds.size() != groups.size()) throw new IllegalArgumentException("Не верная длинна массива orderedIds");
+        for (int i = 0; i < orderedIds.size(); i++) {
+            repository.updatePosition(orderedIds.get(i), i);
+        }
+    }
 
-        if (!data.getName().isEmpty()) group.setName(data.getName());
-        if (!data.getColor().isEmpty()) group.setColor(data.getColor());
+    @Transactional
+    public void configureGroup(ConfigureGroupData data) {
+        var group = repository.findById(data.getGroupId()).orElseThrow();
+
+        if (data.getName() != null && !data.getName().isEmpty()) group.setName(data.getName());
+        if (data.getColor() != null && !data.getColor().isEmpty()) group.setColor(data.getColor());
         if (data.getHidden() != null) group.setHidden(data.getHidden());
         if (data.getMinimized() != null) group.setMinimized(data.getMinimized());
+        if (data.getOrderedIds() != null) {
+            if (data.getOrderedIds().size() != group.getHabits().size()) throw new IllegalArgumentException("Неверная длинна массива orderedIds");
+            for (int i = 0; i < data.getOrderedIds().size(); i++) {
+                habitRepository.updatePosition(data.getOrderedIds().get(i), i);
+            }
+        }
 
         repository.save(group);
     }
 
     public void deleteGroup(Long id) {
         repository.deleteById(id);
+    }
+
+    public static GroupData toGroupData(HabitGroup group, List<HabitData> habits) {
+        return GroupData.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .color(group.getColor())
+                .hidden(group.isHidden())
+                .minimized(group.isMinimized())
+                .position(group.getPosition())
+                .habits(habits)
+                .build();
     }
 }

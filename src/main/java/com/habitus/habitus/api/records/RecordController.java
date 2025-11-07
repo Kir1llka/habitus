@@ -1,8 +1,8 @@
 package com.habitus.habitus.api.records;
 
 import com.habitus.habitus.api.Result;
+import com.habitus.habitus.api.group.GroupData;
 import com.habitus.habitus.api.records.data.DayData;
-import com.habitus.habitus.api.records.data.GroupData;
 import com.habitus.habitus.api.records.data.PutRecordBody;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.service.RecordService;
@@ -42,9 +42,7 @@ public class RecordController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate
     ) {
-        return Result.ok(recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate, userDetails.getUser().getSettings().isShowHidden()).stream()
-                .map(group -> Convector.toGroupData(group, startDate, endDate))
-                .toList());
+        return Result.ok(recordService.getGroupsData(userDetails.getUser(), startDate, endDate));
     }
 
     @Operation(summary = "Получить дни с записями")
@@ -61,7 +59,7 @@ public class RecordController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate
     ) {
-        return Result.ok(Convector.toDayDataList(recordService.getRecordsBetweenDates(userDetails.getUser(), startDate, endDate, userDetails.getUser().getSettings().isShowHidden()), startDate, endDate));
+        return Result.ok(recordService.getDaysData(userDetails.getUser(), startDate, endDate));
     }
 
     @Operation(summary = "Добавить/обновить запись привычки за конкретную дату")

@@ -14,5 +14,6 @@ public class GroupData {
     private String color;
     private boolean hidden;
     private boolean minimized;
+    private int position;
     private List<HabitData> habits;
 }
