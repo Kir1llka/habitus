@@ -141,7 +141,7 @@ public class RecordService {
     }
 
     @PostConstruct
-    public HabitGroup createDemoData() {
+    public void createDemoData() {
         var admin = new UserInfo();
         admin.setId(1L);
         admin.setName("admin");
@@ -151,47 +151,47 @@ public class RecordService {
 
         userDetailsService.addUser(admin);
 
-        // 1️⃣ Создаем группу привычек
-        HabitGroup group = new HabitGroup();
-        group.setName("Мои привычки");
-        group.setColor("#3498db");
-        group.setPosition(0);
-        group.setOwner(admin);
-        habitGroupRepository.save(group);
+        for (int j = 1; j <= 3; j++) {
+            // 1️⃣ Создаем группу привычек
+            HabitGroup group = new HabitGroup();
+            group.setName("Мои привычки" + j);
+            group.setColor("#"+j*2+"4"+j*2+"8db");
+            group.setPosition(j-1);
+            group.setOwner(admin);
+            habitGroupRepository.save(group);
 
-        // 2️⃣ Создаем 3 привычки
-        List<Habit> habits = new ArrayList<>();
-        for (int i = 1; i <= 3; i++) {
-            Habit habit = new Habit();
-            habit.setName("Привычка " + i);
-            habit.setType(HabitType.GENERAL);
-            habit.setPosition(i-1);
-            habit.setGroup(group);
-            habitRepository.save(habit);
-            habits.add(habit);
+            // 2️⃣ Создаем 3 привычки
+            List<Habit> habits = new ArrayList<>();
+            for (int i = 1; i <= 3-j+1; i++) {
+                Habit habit = new Habit();
+                habit.setName(j+ " Привычка " + i);
+                habit.setType(HabitType.GENERAL);
+                habit.setPosition(i - 1);
+                habit.setGroup(group);
+                habitRepository.save(habit);
+                habits.add(habit);
 
-            // 3️⃣ Создаем записи для 1–5 сентября
-            for (int day = 1; day <= 5; day++) {
-                LocalDate date = LocalDate.of(2023, 9, day);
+                // 3️⃣ Создаем записи для 1–5 сентября
+                for (LocalDate date = LocalDate.of(2025, 10, 1); date.isBefore(LocalDate.now()); date = date.plusDays(1)) {
 
-                RecordId id = new RecordId();
-                id.setUserId(admin.getId());
-                id.setHabitId(habit.getId());
-                id.setRecordDate(date);
+                    RecordId id = new RecordId();
+                    id.setUserId(admin.getId());
+                    id.setHabitId(habit.getId());
+                    id.setRecordDate(date);
 
-                RecordInfo record = new RecordInfo();
-                record.setId(id);
-                record.setUser(admin);
-                record.setHabit(habit);
-                record.setPayload("DONE");
+                    RecordInfo record = new RecordInfo();
+                    record.setId(id);
+                    record.setUser(admin);
+                    record.setHabit(habit);
+                    record.setPayload("DONE");
 
-                recordRepository.save(record);
+                    recordRepository.save(record);
+                }
             }
+            // 4️⃣ Устанавливаем привычки в группу
+            group.setHabits(habits);
+            habitGroupRepository.save(group);
         }
 
-        // 4️⃣ Устанавливаем привычки в группу
-        group.setHabits(habits);
-
-        return habitGroupRepository.save(group);
     }
 }
