@@ -3,6 +3,7 @@ package com.habitus.habitus.service;
 import com.habitus.habitus.api.group.GroupData;
 import com.habitus.habitus.api.records.data.DayData;
 import com.habitus.habitus.api.records.data.DayRecordData;
+import com.habitus.habitus.api.records.data.GroupsResponse;
 import com.habitus.habitus.api.records.data.PutRecordBody;
 import com.habitus.habitus.api.records.data.RecordData;
 import com.habitus.habitus.repository.HabitGroupRepository;
@@ -39,10 +40,13 @@ public class RecordService {
     private HabitRepository habitRepository;
     private RecordRepository recordRepository;
 
-    public List<GroupData> getGroupsData(UserInfo user, LocalDate startDate, LocalDate endDate) {
-        return getRecordsBetweenDates(user, startDate, endDate).stream()
-                .map(g -> getGroupData(g, startDate, endDate))
-                .toList();
+    public GroupsResponse getGroupsData(UserInfo user, LocalDate startDate, LocalDate endDate) {
+        return new GroupsResponse(
+                Stream.iterate(startDate, date -> !date.isAfter(endDate), date -> date.plusDays(1)).toList(),
+                getRecordsBetweenDates(user, startDate, endDate).stream()
+                        .map(g -> getGroupData(g, startDate, endDate))
+                        .toList()
+        );
     }
 
     private GroupData getGroupData(HabitGroup group, LocalDate startDate, LocalDate endDate) {
@@ -64,7 +68,7 @@ public class RecordService {
                         date -> date.plusDays(1)
                 )
                 .map(date -> map.getOrDefault(date, RecordData.builder().date(date).build()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static RecordData toRecordData(RecordInfo recordInfo) {
@@ -155,16 +159,16 @@ public class RecordService {
             // 1️⃣ Создаем группу привычек
             HabitGroup group = new HabitGroup();
             group.setName("Мои привычки" + j);
-            group.setColor("#"+j*2+"4"+j*2+"8db");
-            group.setPosition(j-1);
+            group.setColor("#" + j * 2 + "4" + j * 2 + "8db");
+            group.setPosition(j - 1);
             group.setOwner(admin);
             habitGroupRepository.save(group);
 
             // 2️⃣ Создаем 3 привычки
             List<Habit> habits = new ArrayList<>();
-            for (int i = 1; i <= 3-j+1; i++) {
+            for (int i = 1; i <= 3 - j + 1; i++) {
                 Habit habit = new Habit();
-                habit.setName(j+ " Привычка " + i);
+                habit.setName(j + " Привычка " + i);
                 habit.setType(HabitType.GENERAL);
                 habit.setPosition(i - 1);
                 habit.setGroup(group);

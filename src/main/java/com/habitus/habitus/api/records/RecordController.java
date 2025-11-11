@@ -1,8 +1,8 @@
 package com.habitus.habitus.api.records;
 
 import com.habitus.habitus.api.Result;
-import com.habitus.habitus.api.group.GroupData;
 import com.habitus.habitus.api.records.data.DayData;
+import com.habitus.habitus.api.records.data.GroupsResponse;
 import com.habitus.habitus.api.records.data.PutRecordBody;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.service.RecordService;
@@ -30,7 +30,7 @@ public class RecordController {
 
     @Operation(summary = "Получить все группы привычек со всеми записями в диапазоне дат")
     @GetMapping()
-    public Result<List<GroupData>> getGroups(
+    public Result<GroupsResponse> getGroups(
             @AuthenticationPrincipal
             UserDetailsInfo userDetails,
 
