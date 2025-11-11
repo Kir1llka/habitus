@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 public class DayRecordData {
     private Long habitId;
-    private String value;
+    private Object value;
 }

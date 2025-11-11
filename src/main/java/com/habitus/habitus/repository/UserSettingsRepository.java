@@ -1,6 +1,6 @@
 package com.habitus.habitus.repository;
 
-import com.habitus.habitus.repository.entity.RecordInfo;
+import com.habitus.habitus.repository.entity.records.RecordInfo;
 import com.habitus.habitus.repository.entity.UserSettings;
 import com.habitus.habitus.security.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;

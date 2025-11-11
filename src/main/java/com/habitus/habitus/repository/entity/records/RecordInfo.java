@@ -1,27 +1,27 @@
-package com.habitus.habitus.repository.entity;
+package com.habitus.habitus.repository.entity.records;
 
+import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.security.UserInfo;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "records")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Data
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class RecordInfo {
+public abstract class RecordInfo {
 
     @EmbeddedId
     private RecordId id;
@@ -40,5 +40,5 @@ public class RecordInfo {
     @EqualsAndHashCode.Exclude
     private UserInfo user;
 
-    private String payload;
+    public abstract Object getPayload();
 }

@@ -1,5 +1,6 @@
 package com.habitus.habitus.repository.entity;
 
+import com.habitus.habitus.repository.entity.records.RecordInfo;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

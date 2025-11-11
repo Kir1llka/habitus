@@ -1,20 +1,28 @@
 package com.habitus.habitus.service;
 
+import com.github.javafaker.Faker;
 import com.habitus.habitus.api.group.GroupData;
 import com.habitus.habitus.api.records.data.DayData;
 import com.habitus.habitus.api.records.data.DayRecordData;
 import com.habitus.habitus.api.records.data.GroupsResponse;
 import com.habitus.habitus.api.records.data.PutRecordBody;
 import com.habitus.habitus.api.records.data.RecordData;
+import com.habitus.habitus.repository.BooleanRecordRepository;
 import com.habitus.habitus.repository.HabitGroupRepository;
 import com.habitus.habitus.repository.HabitRepository;
-import com.habitus.habitus.repository.RecordRepository;
+import com.habitus.habitus.repository.NumberRecordRepository;
+import com.habitus.habitus.repository.TextRecordRepository;
+import com.habitus.habitus.repository.TimeRecordRepository;
 import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitGroup;
 import com.habitus.habitus.repository.entity.HabitType;
-import com.habitus.habitus.repository.entity.RecordId;
-import com.habitus.habitus.repository.entity.RecordInfo;
 import com.habitus.habitus.repository.entity.UserSettings;
+import com.habitus.habitus.repository.entity.records.BooleanRecord;
+import com.habitus.habitus.repository.entity.records.NumberRecord;
+import com.habitus.habitus.repository.entity.records.RecordId;
+import com.habitus.habitus.repository.entity.records.RecordInfo;
+import com.habitus.habitus.repository.entity.records.TextRecord;
+import com.habitus.habitus.repository.entity.records.TimeRecord;
 import com.habitus.habitus.security.Role;
 import com.habitus.habitus.security.UserDetailsServiceImpl;
 import com.habitus.habitus.security.UserInfo;
@@ -23,9 +31,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,7 +48,10 @@ public class RecordService {
     private UserDetailsServiceImpl userDetailsService;
     private HabitGroupRepository habitGroupRepository;
     private HabitRepository habitRepository;
-    private RecordRepository recordRepository;
+    private BooleanRecordRepository booleanRecordRepository;
+    private TextRecordRepository textRecordRepository;
+    private NumberRecordRepository numberRecordRepository;
+    private TimeRecordRepository timeRecordRepository;
 
     public GroupsResponse getGroupsData(UserInfo user, LocalDate startDate, LocalDate endDate) {
         return new GroupsResponse(
@@ -118,34 +131,65 @@ public class RecordService {
 
         groups.stream()
                 .flatMap(g -> g.getHabits().stream())
-                .forEach(habit -> {
-                    List<RecordInfo> records = recordRepository.findByHabitAndId_RecordDateBetween(habit, startDate, endDate);
-                    habit.setRecords(records);
-                });
+                .forEach(habit -> habit.setRecords(getRecords(habit, startDate, endDate)));
 
         return groups;
     }
 
     public void putRecord(UserInfo user, PutRecordBody body) {
         var habit = habitRepository.findById(body.getHabitId()).orElseThrow();
+        saveRecord(user, habit, body.getDate(), body.getValue());
+    }
+
+    private void saveRecord(UserInfo user, Habit habit, LocalDate date, Object value) {
         var id = RecordId.builder()
                 .userId(user.getId())
                 .habitId(habit.getId())
-                .recordDate(body.getDate())
+                .recordDate(date)
                 .build();
-
-        var record = RecordInfo.builder()
-                .id(id)
-                .user(user)
-                .habit(habit)
-                .payload(body.getValue())
-                .build();
-
-        recordRepository.save(record);
+        switch (habit.getType()) {
+            case GENERAL -> {
+                booleanRecordRepository.save(BooleanRecord.builder().id(id).user(user).habit(habit).payload((Boolean) value).build());
+            }
+            case NUMBER -> {
+                numberRecordRepository.save(NumberRecord.builder().id(id).user(user).habit(habit).payload((Double) value).build());
+            }
+            case TEXT -> {
+                textRecordRepository.save(TextRecord.builder().id(id).user(user).habit(habit).payload((String) value).build());
+            }
+            case TIME -> {
+                timeRecordRepository.save(TimeRecord.builder().id(id).user(user).habit(habit).payload((LocalTime) value).build());
+            }
+        }
     }
+
+    private List<RecordInfo> getRecords(Habit habit, LocalDate start, LocalDate end) {
+        switch (habit.getType()) {
+            case GENERAL -> {
+                return booleanRecordRepository.findByHabitAndId_RecordDateBetween(habit, start, end).stream()
+                        .map(r -> (RecordInfo) r).toList();
+            }
+            case NUMBER -> {
+                return numberRecordRepository.findByHabitAndId_RecordDateBetween(habit, start, end).stream()
+                        .map(r -> (RecordInfo) r).toList();
+            }
+            case TEXT -> {
+                return textRecordRepository.findByHabitAndId_RecordDateBetween(habit, start, end).stream()
+                        .map(r -> (RecordInfo) r).toList();
+            }
+            case TIME -> {
+                return timeRecordRepository.findByHabitAndId_RecordDateBetween(habit, start, end).stream()
+                        .map(r -> (RecordInfo) r).toList();
+            }
+        }
+        throw new IllegalArgumentException();
+    }
+
 
     @PostConstruct
     public void createDemoData() {
+        Faker faker = new Faker(new Random(24));
+
         var admin = new UserInfo();
         admin.setId(1L);
         admin.setName("admin");
@@ -166,36 +210,43 @@ public class RecordService {
 
             // 2️⃣ Создаем 3 привычки
             List<Habit> habits = new ArrayList<>();
-            for (int i = 1; i <= 3 - j + 1; i++) {
+            for (int i = 1; i <= 4 - j + 1; i++) {
                 Habit habit = new Habit();
                 habit.setName(j + " Привычка " + i);
-                habit.setType(HabitType.GENERAL);
+
+                var type = HabitType.GENERAL;
+                if (i == 2) type = HabitType.NUMBER;
+                if (i == 3) type = HabitType.TEXT;
+                if (i == 4) type = HabitType.TIME;
+                habit.setType(type);
                 habit.setPosition(i - 1);
                 habit.setGroup(group);
                 habitRepository.save(habit);
                 habits.add(habit);
 
-                // 3️⃣ Создаем записи для 1–5 сентября
+                // 3️⃣ Создаем записи
                 for (LocalDate date = LocalDate.of(2025, 10, 1); date.isBefore(LocalDate.now()); date = date.plusDays(1)) {
-
-                    RecordId id = new RecordId();
-                    id.setUserId(admin.getId());
-                    id.setHabitId(habit.getId());
-                    id.setRecordDate(date);
-
-                    RecordInfo record = new RecordInfo();
-                    record.setId(id);
-                    record.setUser(admin);
-                    record.setHabit(habit);
-                    record.setPayload("DONE");
-
-                    recordRepository.save(record);
+                    saveRecord(admin, habit, date, getRandomValue(type, faker));
                 }
             }
-            // 4️⃣ Устанавливаем привычки в группу
-            group.setHabits(habits);
-            habitGroupRepository.save(group);
         }
+    }
 
+    private Object getRandomValue(HabitType type, Faker faker) {
+        switch (type){
+            case GENERAL -> {
+                return faker.bool().bool();
+            }
+            case NUMBER -> {
+                return Double.valueOf(faker.number().numberBetween(1,100));
+            }
+            case TEXT -> {
+                return faker.book().genre();
+            }
+            case TIME -> {
+                return LocalTime.of(0, faker.number().numberBetween(0, 59));
+            }
+        }
+        throw new IllegalArgumentException();
     }
 }

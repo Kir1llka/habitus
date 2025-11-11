@@ -9,5 +9,5 @@ import java.time.LocalDate;
 @Builder
 public class RecordData {
     private LocalDate date;
-    private String value;
+    private Object value;
 }

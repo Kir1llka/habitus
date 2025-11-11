@@ -1,4 +1,4 @@
-package com.habitus.habitus.repository.entity;
+package com.habitus.habitus.repository.entity.records;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -17,13 +17,12 @@ import java.time.LocalDate;
 @Builder
 public class RecordId implements Serializable {
 
+    @Column(name = "record_date")
+    private LocalDate recordDate;
+
     @Column(name = "user_id")
     private Long userId;
 
     @Column(name = "habit_id")
     private Long habitId;
-
-    // Используем дату без времени — если важно различать время, можно взять LocalDateTime
-    @Column(name = "record_date")
-    private LocalDate recordDate;
 }

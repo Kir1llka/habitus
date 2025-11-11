@@ -11,5 +11,5 @@ public class PutRecordBody {
     private Long habitId;
     @NotNull
     private LocalDate date;
-    private String value;
+    private Object value;
 }
