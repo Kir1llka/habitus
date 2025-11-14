@@ -1,7 +1,6 @@
 package com.habitus.habitus.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,8 +20,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         repository.save(user);
     }
 
+    public UserInfo getUser(Long id) {
+        return repository.findById(id).orElse(null);
+    }
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetailsInfo loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserInfo> user = repository.findByName(username);
         return user.map(UserDetailsInfo::new)
                 .orElseThrow(() -> new UsernameNotFoundException(username + " not found"));

@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 public class BooleanRecord extends RecordInfo {
-    private boolean payload;
+    private Boolean payload;
 
     @Override
     public Object getPayload() {

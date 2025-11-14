@@ -185,19 +185,30 @@ public class RecordService {
         throw new IllegalArgumentException();
     }
 
+    public void restoreDemoData() {
+        var admin = userDetailsService.loadUserByUsername("admin").getUser();
+        var groups = habitGroupRepository.findByOwner(admin);
+
+        habitGroupRepository.deleteAll(groups);
+
+        createDemoData();
+    }
 
     @PostConstruct
     public void createDemoData() {
         Faker faker = new Faker(new Random(24));
 
-        var admin = new UserInfo();
-        admin.setId(1L);
-        admin.setName("admin");
-        admin.setPassword("admin");
-        admin.setRoles(Set.of(Role.ADMIN));
-        admin.setSettings(UserSettings.builder().user(admin).build());
+        UserInfo admin = userDetailsService.getUser(1L);
+        if (admin == null) {
+            admin = new UserInfo();
+            admin.setId(1L);
+            admin.setName("admin");
+            admin.setPassword("admin");
+            admin.setRoles(Set.of(Role.ADMIN));
+            admin.setSettings(UserSettings.builder().user(admin).build());
 
-        userDetailsService.addUser(admin);
+            userDetailsService.addUser(admin);
+        }
 
         for (int j = 1; j <= 3; j++) {
             // 1️⃣ Создаем группу привычек
@@ -208,8 +219,7 @@ public class RecordService {
             group.setOwner(admin);
             habitGroupRepository.save(group);
 
-            // 2️⃣ Создаем 3 привычки
-            List<Habit> habits = new ArrayList<>();
+            // 2️⃣ Создаем привычки
             for (int i = 1; i <= 4 - j + 1; i++) {
                 Habit habit = new Habit();
                 habit.setName(j + " Привычка " + i);
@@ -222,11 +232,10 @@ public class RecordService {
                 habit.setPosition(i - 1);
                 habit.setGroup(group);
                 habitRepository.save(habit);
-                habits.add(habit);
 
                 // 3️⃣ Создаем записи
                 for (LocalDate date = LocalDate.of(2025, 10, 1); date.isBefore(LocalDate.now()); date = date.plusDays(1)) {
-                    saveRecord(admin, habit, date, getRandomValue(type, faker));
+                    if (faker.number().numberBetween(0, 100) < 75) saveRecord(admin, habit, date, getRandomValue(type, faker));
                 }
             }
         }
@@ -235,7 +244,7 @@ public class RecordService {
     private Object getRandomValue(HabitType type, Faker faker) {
         switch (type){
             case GENERAL -> {
-                return faker.bool().bool();
+                return true;
             }
             case NUMBER -> {
                 return Double.valueOf(faker.number().numberBetween(1,100));

@@ -1,5 +1,6 @@
 package com.habitus.habitus.api;
 
+import com.habitus.habitus.security.Role;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.security.UserRepository;
 import com.habitus.habitus.service.RecordService;
@@ -27,5 +28,15 @@ public class TestController {
     @GetMapping("/user")
     public String getCurrentUser(@AuthenticationPrincipal UserDetailsInfo user) {
         return user.getUsername();
+    }
+
+    @Operation(summary = "Восстановить тестовые данные")
+    @GetMapping("/restore")
+    public void restore(@AuthenticationPrincipal UserDetailsInfo user) {
+
+        if (user.getUser().getRoles().contains(Role.ADMIN)) {
+            recordService.restoreDemoData();
+        }
+
     }
 }
