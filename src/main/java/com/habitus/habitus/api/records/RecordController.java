@@ -1,6 +1,7 @@
 package com.habitus.habitus.api.records;
 
 import com.habitus.habitus.api.Result;
+import com.habitus.habitus.api.group.GroupData;
 import com.habitus.habitus.api.records.data.DayData;
 import com.habitus.habitus.api.records.data.GroupsResponse;
 import com.habitus.habitus.api.records.data.PutRecordBody;
@@ -43,6 +44,19 @@ public class RecordController {
             LocalDate endDate
     ) {
         return Result.ok(recordService.getGroupsData(userDetails.getUser(), startDate, endDate));
+    }
+
+    @Operation(summary = "Получить все группы привычек со всеми записями за определенный день")
+    @GetMapping("day")
+    public Result<GroupsResponse> getDay(
+            @AuthenticationPrincipal
+            UserDetailsInfo userDetails,
+
+            @RequestParam("date")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date
+    ) {
+        return Result.ok(recordService.getGroupsData(userDetails.getUser(), date, date));
     }
 
     @Operation(summary = "Получить дни с записями")

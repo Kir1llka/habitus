@@ -20,7 +20,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
   h2:
     console:
       enabled: true
@@ -31,6 +31,7 @@ logging:
     org:
       springframework:
         security: WARN
+        web.filter.CommonsRequestLoggingFilter: DEBUG
 
 springdoc:
   swagger-ui:
