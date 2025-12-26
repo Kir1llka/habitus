@@ -152,13 +152,17 @@ public class RecordService {
                 booleanRecordRepository.save(BooleanRecord.builder().id(id).user(user).habit(habit).payload((Boolean) value).build());
             }
             case NUMBER -> {
-                numberRecordRepository.save(NumberRecord.builder().id(id).user(user).habit(habit).payload((Double) value).build());
+                numberRecordRepository.save(NumberRecord.builder().id(id).user(user).habit(habit)
+                        .payload(value instanceof Double ? (Double) value : Double.valueOf((Integer) value))
+                        .build());
             }
             case TEXT -> {
                 textRecordRepository.save(TextRecord.builder().id(id).user(user).habit(habit).payload((String) value).build());
             }
             case TIME -> {
-                timeRecordRepository.save(TimeRecord.builder().id(id).user(user).habit(habit).payload((LocalTime) value).build());
+                timeRecordRepository.save(TimeRecord.builder().id(id).user(user).habit(habit)
+                        .payload(value instanceof LocalTime ? (LocalTime) value : LocalTime.parse((String) value))
+                        .build());
             }
         }
     }
