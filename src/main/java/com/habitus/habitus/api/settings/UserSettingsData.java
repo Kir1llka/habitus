@@ -7,4 +7,8 @@ import lombok.Data;
 @Builder
 public class UserSettingsData {
     private boolean showHidden;
+    private boolean displayHints;
+    private boolean dashboardHint;
+    private boolean tableHint;
+    private boolean settingsHint;
 }

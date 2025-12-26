@@ -29,6 +29,10 @@ public class UserSettings {
     private Long id;
 
     private boolean showHidden;
+    private boolean displayHints;
+    private boolean dashboardHint;
+    private boolean tableHint;
+    private boolean settingsHint;
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
