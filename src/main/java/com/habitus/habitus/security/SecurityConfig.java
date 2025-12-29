@@ -50,6 +50,17 @@ public class SecurityConfig {
                         .successHandler(jsonAuthSuccessHandler())
                         .failureHandler(jsonAuthFailureHandler())
                 )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessHandler((req, res, auth) -> {
+                            res.setStatus(HttpServletResponse.SC_OK);
+                            res.setContentType("application/json");
+                            res.getWriter().write("{\"message\":\"Logged out\"}");
+                        })
+                )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
