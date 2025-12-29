@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @RestController
@@ -35,6 +36,7 @@ public class SettingsController {
         UserInfo user = new UserInfo();
         user.setName(data.getName());
         user.setPassword(data.getPassword());
+        user.setRegistrationDate(LocalDate.now());
         user.setRoles(Set.of(Role.USER));
         user.setSettings(UserSettings.builder()
                 .showHidden(false)

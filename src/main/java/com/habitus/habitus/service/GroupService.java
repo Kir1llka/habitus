@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class GroupService {
         var groups = repository.findByOwner(user);
         var group = HabitGroup.builder()
                 .name(data.getName())
+                .startDate(LocalDate.now())
                 .color(data.getColor())
                 .owner(user)
                 .position(groups.size())
@@ -70,6 +72,9 @@ public class GroupService {
     public void configureGroup(ConfigureGroupData data) {
         var group = repository.findById(data.getGroupId()).orElseThrow();
 
+        if (data.getName() != null && !data.getName().isEmpty()) group.setName(data.getName());
+        if (data.getStartDate() != null) group.setStartDate(data.getStartDate());
+        if (data.getEndDate() != null) group.setEndDate(data.getEndDate());
         if (data.getName() != null && !data.getName().isEmpty()) group.setName(data.getName());
         if (data.getColor() != null && !data.getColor().isEmpty()) group.setColor(data.getColor());
         if (data.getHidden() != null) group.setHidden(data.getHidden());
@@ -92,6 +97,8 @@ public class GroupService {
         return GroupData.builder()
                 .id(group.getId())
                 .name(group.getName())
+                .startDate(group.getStartDate())
+                .endDate(group.getEndDate())
                 .color(group.getColor())
                 .hidden(group.isHidden())
                 .minimized(group.isMinimized())

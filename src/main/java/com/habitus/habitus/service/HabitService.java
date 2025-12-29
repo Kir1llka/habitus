@@ -11,6 +11,7 @@ import com.habitus.habitus.repository.entity.HabitType;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -28,6 +29,7 @@ public class HabitService {
         var group = groupRepository.findById(data.getGroupId()).orElseThrow();
         var habit = Habit.builder()
                 .name(data.getName())
+                .startDate(LocalDate.now())
                 .type(HabitType.valueOf(data.getType()))
                 .hidden(data.isHidden())
                 .position(group.getHabits().size())
@@ -40,6 +42,8 @@ public class HabitService {
         var habit = repository.findById(data.getHabitId()).orElseThrow();
 
         if (data.getName() != null && !data.getName().isEmpty()) habit.setName(data.getName());
+        if (data.getStartDate() != null) habit.setStartDate(data.getStartDate());
+        if (data.getEndDate() != null) habit.setEndDate(data.getEndDate());
         if (data.getHidden() != null) habit.setHidden(data.getHidden());
         if (data.getGroupId() != null) {
             habit.setGroup(groupRepository.findById(data.getGroupId()).orElseThrow());
@@ -60,6 +64,8 @@ public class HabitService {
         return HabitData.builder()
                 .id(habit.getId())
                 .name(habit.getName())
+                .startDate(habit.getStartDate())
+                .endDate(habit.getEndDate())
                 .type(habit.getType())
                 .hidden(habit.isHidden())
                 .position(habit.getPosition())

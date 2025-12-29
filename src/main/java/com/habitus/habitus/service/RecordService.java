@@ -165,6 +165,10 @@ public class RecordService {
                         .build());
             }
         }
+        if (date.isBefore(habit.getStartDate())) {
+            habit.setStartDate(date);
+            habitRepository.save(habit);
+        }
     }
 
     private List<RecordInfo> getRecords(Habit habit, LocalDate start, LocalDate end) {
@@ -208,6 +212,7 @@ public class RecordService {
             admin.setId(1L);
             admin.setName("admin");
             admin.setPassword("admin");
+            admin.setRegistrationDate(LocalDate.now());
             admin.setRoles(Set.of(Role.ADMIN));
             admin.setSettings(UserSettings.builder().user(admin).build());
 
@@ -218,6 +223,7 @@ public class RecordService {
             // 1️⃣ Создаем группу привычек
             HabitGroup group = new HabitGroup();
             group.setName("Мои привычки" + j);
+            group.setStartDate(LocalDate.of(2025, 10, 1));
             group.setColor("#" + j * 2 + "4" + j * 2 + "8db");
             group.setPosition(j - 1);
             group.setOwner(admin);
@@ -227,6 +233,7 @@ public class RecordService {
             for (int i = 1; i <= 4 - j + 1; i++) {
                 Habit habit = new Habit();
                 habit.setName(j + " Привычка " + i);
+                habit.setStartDate(LocalDate.of(2025, 10, 1));
 
                 var type = HabitType.GENERAL;
                 if (i == 2) type = HabitType.NUMBER;

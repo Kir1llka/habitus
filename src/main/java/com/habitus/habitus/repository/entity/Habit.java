@@ -19,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,10 @@ public class Habit {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @Column(nullable = false)
     private HabitType type;
