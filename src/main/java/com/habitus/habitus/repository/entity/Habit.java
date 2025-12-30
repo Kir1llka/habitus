@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,11 +42,19 @@ public class Habit {
     @Column(nullable = false)
     private LocalDate startDate;
     private LocalDate endDate;
+    private LocalDate eldestDate;
 
     @Column(nullable = false)
     private HabitType type;
     private boolean hidden;
     private int position;
+
+    @Column(nullable = false)
+    private ScheduleType schedule;
+    private Integer scheduleN;
+
+    @OneToOne(mappedBy = "habit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private HabitStats stats;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)

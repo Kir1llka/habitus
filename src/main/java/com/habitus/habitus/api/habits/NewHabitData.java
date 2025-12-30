@@ -12,5 +12,8 @@ public class NewHabitData {
     private String name;
     @NotBlank
     private String type;
+    @NotBlank
+    private String schedule;
+    private Integer scheduleN;
     private boolean hidden;
 }

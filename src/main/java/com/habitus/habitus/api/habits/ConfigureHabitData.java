@@ -13,5 +13,7 @@ public class ConfigureHabitData {
     private String name;
     private LocalDate startDate;
     private LocalDate endDate;
+    private String schedule;
+    private Integer scheduleN;
     private Boolean hidden;
 }

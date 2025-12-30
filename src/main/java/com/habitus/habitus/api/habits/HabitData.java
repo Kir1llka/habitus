@@ -3,6 +3,7 @@ package com.habitus.habitus.api.habits;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.habitus.habitus.api.records.data.RecordData;
 import com.habitus.habitus.repository.entity.HabitType;
+import com.habitus.habitus.repository.entity.ScheduleType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,6 +19,8 @@ public class HabitData {
     private LocalDate startDate;
     private LocalDate endDate;
     private HabitType type;
+    private ScheduleType schedule;
+    private Integer scheduleN;
     private boolean hidden;
     private int position;
     private List<RecordData> records;

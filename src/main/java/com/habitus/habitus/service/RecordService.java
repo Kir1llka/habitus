@@ -15,7 +15,9 @@ import com.habitus.habitus.repository.TextRecordRepository;
 import com.habitus.habitus.repository.TimeRecordRepository;
 import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitGroup;
+import com.habitus.habitus.repository.entity.HabitStats;
 import com.habitus.habitus.repository.entity.HabitType;
+import com.habitus.habitus.repository.entity.ScheduleType;
 import com.habitus.habitus.repository.entity.UserSettings;
 import com.habitus.habitus.repository.entity.records.BooleanRecord;
 import com.habitus.habitus.repository.entity.records.NumberRecord;
@@ -46,6 +48,7 @@ import java.util.stream.Stream;
 public class RecordService {
 
     private UserDetailsServiceImpl userDetailsService;
+    private StatsService statsService;
     private HabitGroupRepository habitGroupRepository;
     private HabitRepository habitRepository;
     private BooleanRecordRepository booleanRecordRepository;
@@ -169,6 +172,11 @@ public class RecordService {
             habit.setStartDate(date);
             habitRepository.save(habit);
         }
+        if (habit.getEldestDate() == null || date.isAfter(habit.getEldestDate())) {
+            habit.setEldestDate(date);
+            habitRepository.save(habit);
+        }
+        statsService.updateStats(habit);
     }
 
     private List<RecordInfo> getRecords(Habit habit, LocalDate start, LocalDate end) {
@@ -234,6 +242,17 @@ public class RecordService {
                 Habit habit = new Habit();
                 habit.setName(j + " Привычка " + i);
                 habit.setStartDate(LocalDate.of(2025, 10, 1));
+                habit.setSchedule(ScheduleType.EVERYDAY);
+                habit.setStats(HabitStats.builder()
+                        .completion(0)
+                        .completionCount(0)
+                        .weekCompletion(0)
+                        .maxStreak(0)
+                        .maxMiss(0)
+                        .currentStreak(0)
+                        .currentMiss(0)
+                        .build());
+                habit.getStats().setHabit(habit);
 
                 var type = HabitType.GENERAL;
                 if (i == 2) type = HabitType.NUMBER;
@@ -246,19 +265,20 @@ public class RecordService {
 
                 // 3️⃣ Создаем записи
                 for (LocalDate date = LocalDate.of(2025, 10, 1); date.isBefore(LocalDate.now()); date = date.plusDays(1)) {
-                    if (faker.number().numberBetween(0, 100) < 75) saveRecord(admin, habit, date, getRandomValue(type, faker));
+                    if (faker.number().numberBetween(0, 100) < 75)
+                        saveRecord(admin, habit, date, getRandomValue(type, faker));
                 }
             }
         }
     }
 
     private Object getRandomValue(HabitType type, Faker faker) {
-        switch (type){
+        switch (type) {
             case GENERAL -> {
                 return true;
             }
             case NUMBER -> {
-                return Double.valueOf(faker.number().numberBetween(1,100));
+                return Double.valueOf(faker.number().numberBetween(1, 100));
             }
             case TEXT -> {
                 return faker.book().genre();
