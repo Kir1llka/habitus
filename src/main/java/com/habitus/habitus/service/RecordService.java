@@ -204,7 +204,6 @@ public class RecordService {
     public void restoreDemoData() {
         var admin = userDetailsService.loadUserByUsername("admin").getUser();
         var groups = habitGroupRepository.findByOwner(admin);
-
         habitGroupRepository.deleteAll(groups);
 
         createDemoData();
@@ -226,6 +225,8 @@ public class RecordService {
 
             userDetailsService.addUser(admin);
         }
+        var groups = habitGroupRepository.findByOwner(admin);
+        habitGroupRepository.deleteAll(groups);
 
         for (int j = 1; j <= 3; j++) {
             // 1️⃣ Создаем группу привычек

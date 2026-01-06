@@ -33,7 +33,7 @@ public class HabitService {
                 .name(data.getName())
                 .startDate(LocalDate.now())
                 .type(HabitType.valueOf(data.getType()))
-                .schedule(ScheduleType.valueOf(data.getSchedule()))
+                .schedule(data.getSchedule() != null ? ScheduleType.valueOf(data.getSchedule()) : ScheduleType.EVERYDAY)
                 .scheduleN(data.getScheduleN())
                 .stats(HabitStats.builder()
                         .completion(0)

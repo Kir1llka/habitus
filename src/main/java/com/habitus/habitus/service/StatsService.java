@@ -64,7 +64,7 @@ public class StatsService {
 
         var stats = habit.getStats();
         stats.setCompletionCount(doneDates.size());
-        stats.setCompletion((int) (doneDates.size() * 100 / ChronoUnit.DAYS.between(habit.getStartDate(), LocalDate.now())));
+        stats.setCompletion((int) (doneDates.size() * 100 / Math.max(1, ChronoUnit.DAYS.between(habit.getStartDate(), LocalDate.now()))));
         stats.setWeekCompletion(countWeek);
         stats.setMaxStreak(maxStreak);
         stats.setMaxMiss(maxMiss);
