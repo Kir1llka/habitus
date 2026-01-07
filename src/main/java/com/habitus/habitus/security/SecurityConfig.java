@@ -97,7 +97,8 @@ public class SecurityConfig {
     @Primary
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://nnspecter.github.io"));
+        config.setAllowedOriginPatterns(List.of("*"));
+//        config.setAllowedOrigins(List.of("http://localhost:3000", "https://nnspecter.github.io", "null"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
