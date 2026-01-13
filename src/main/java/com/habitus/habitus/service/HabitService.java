@@ -10,6 +10,7 @@ import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitStats;
 import com.habitus.habitus.repository.entity.HabitType;
 import com.habitus.habitus.repository.entity.ScheduleType;
+import com.habitus.habitus.security.UserInfo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +24,12 @@ public class HabitService {
     private HabitRepository repository;
     private HabitGroupRepository groupRepository;
 
-    public HabitData getHabit(Long id) {
-        return toHabitData(repository.findById(id).orElseThrow());
+    public HabitData getHabit(UserInfo user, Long id) {
+        return toHabitData(repository.findByIdAndOwner(id, user).orElseThrow());
     }
 
-    public void addHabit(NewHabitData data) {
-        var group = groupRepository.findById(data.getGroupId()).orElseThrow();
+    public void addHabit(UserInfo user, NewHabitData data) {
+        var group = groupRepository.findByIdAndOwner(data.getGroupId(), user).orElseThrow();
         var habit = Habit.builder()
                 .name(data.getName())
                 .startDate(LocalDate.now())
@@ -46,14 +47,15 @@ public class HabitService {
                         .build())
                 .hidden(data.isHidden())
                 .position(group.getHabits().size())
+                .owner(user)
                 .group(group)
                 .build();
         habit.getStats().setHabit(habit);
         repository.save(habit);
     }
 
-    public void configureHabit(ConfigureHabitData data) {
-        var habit = repository.findById(data.getHabitId()).orElseThrow();
+    public void configureHabit(UserInfo user, ConfigureHabitData data) {
+        var habit = repository.findByIdAndOwner(data.getHabitId(), user).orElseThrow();
 
         if (data.getName() != null && !data.getName().isEmpty()) habit.setName(data.getName());
         if (data.getStartDate() != null) habit.setStartDate(data.getStartDate());
@@ -62,14 +64,15 @@ public class HabitService {
         if (data.getScheduleN() != null) habit.setScheduleN(data.getScheduleN());
         if (data.getHidden() != null) habit.setHidden(data.getHidden());
         if (data.getGroupId() != null) {
-            habit.setGroup(groupRepository.findById(data.getGroupId()).orElseThrow());
+            habit.setGroup(groupRepository.findByIdAndOwner(data.getGroupId(), user).orElseThrow());
         }
 
         repository.save(habit);
     }
 
-    public void deleteHabit(Long id) {
-        repository.deleteById(id);
+    public void deleteHabit(UserInfo user, Long id) {
+        var habit = repository.findByIdAndOwner(id, user).orElseThrow();
+        repository.delete(habit);
     }
 
     public static HabitData toHabitData(Habit habit) {

@@ -140,7 +140,7 @@ public class RecordService {
     }
 
     public void putRecord(UserInfo user, PutRecordBody body) {
-        var habit = habitRepository.findById(body.getHabitId()).orElseThrow();
+        var habit = habitRepository.findByIdAndOwner(body.getHabitId(), user).orElseThrow();
         saveRecord(user, habit, body.getDate(), body.getValue());
     }
 
@@ -262,6 +262,7 @@ public class RecordService {
                 habit.setType(type);
                 habit.setPosition(i - 1);
                 habit.setGroup(group);
+                habit.setOwner(admin);
                 habitRepository.save(habit);
 
                 // 3️⃣ Создаем записи

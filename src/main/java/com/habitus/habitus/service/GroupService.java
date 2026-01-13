@@ -36,8 +36,8 @@ public class GroupService {
                 .toList();
     }
 
-    public GroupData getGroup(Long id) {
-        var group = repository.findById(id).orElseThrow();
+    public GroupData getGroup(UserInfo user, Long id) {
+        var group = repository.findByIdAndOwner(id, user).orElseThrow();
         return toGroupData(
                 group,
                 group.getHabits().stream()
@@ -69,8 +69,8 @@ public class GroupService {
     }
 
     @Transactional
-    public void configureGroup(ConfigureGroupData data) {
-        var group = repository.findById(data.getGroupId()).orElseThrow();
+    public void configureGroup(UserInfo user, ConfigureGroupData data) {
+        var group = repository.findByIdAndOwner(data.getGroupId(), user).orElseThrow();
 
         if (data.getName() != null && !data.getName().isEmpty()) group.setName(data.getName());
         if (data.getStartDate() != null) group.setStartDate(data.getStartDate());
@@ -89,8 +89,9 @@ public class GroupService {
         repository.save(group);
     }
 
-    public void deleteGroup(Long id) {
-        repository.deleteById(id);
+    public void deleteGroup(UserInfo user, Long id) {
+        var group = repository.findByIdAndOwner(id, user).orElseThrow();
+        repository.delete(group);
     }
 
     public static GroupData toGroupData(HabitGroup group, List<HabitData> habits) {

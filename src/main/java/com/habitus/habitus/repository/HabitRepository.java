@@ -2,6 +2,7 @@ package com.habitus.habitus.repository;
 
 import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitGroup;
+import com.habitus.habitus.security.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,9 +10,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HabitRepository extends JpaRepository<Habit, Long> {
+
+    Optional<Habit> findByIdAndOwner(Long id, UserInfo owner);
 
     List<Habit> findByGroup(HabitGroup group);
 

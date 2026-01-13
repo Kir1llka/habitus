@@ -9,9 +9,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HabitGroupRepository extends JpaRepository<HabitGroup, Long> {
+
+    Optional<HabitGroup> findByIdAndOwner(Long id, UserInfo owner);
 
     List<HabitGroup> findByOwner(UserInfo owner);
 

@@ -1,6 +1,7 @@
 package com.habitus.habitus.repository.entity;
 
 import com.habitus.habitus.repository.entity.records.RecordInfo;
+import com.habitus.habitus.security.UserInfo;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,6 +20,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.apache.catalina.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -61,6 +63,12 @@ public class Habit {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private HabitGroup group;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private UserInfo owner;
 
     @OneToMany(mappedBy = "habit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default

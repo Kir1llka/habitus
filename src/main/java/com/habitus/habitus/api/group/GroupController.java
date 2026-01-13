@@ -35,8 +35,12 @@ public class GroupController {
 
     @Operation(summary = "Получить инфо о группе и её привычках")
     @GetMapping("/{id}")
-    public Result<GroupData> getGroup(@PathVariable Long id) {
-        return Result.ok(service.getGroup(id));
+    public Result<GroupData> getGroup(
+            @AuthenticationPrincipal
+            UserDetailsInfo userDetails,
+            @PathVariable Long id
+    ) {
+        return Result.ok(service.getGroup(userDetails.getUser(), id));
     }
 
     @Operation(summary = "Добавить новую группу")
@@ -54,8 +58,12 @@ public class GroupController {
 
     @Operation(summary = "Изменить параметры группы")
     @PostMapping("/configure")
-    public Result<Void> configureGroup(@Valid @RequestBody ConfigureGroupData data) {
-        service.configureGroup(data);
+    public Result<Void> configureGroup(
+            @AuthenticationPrincipal
+            UserDetailsInfo userDetails,
+            @Valid @RequestBody ConfigureGroupData data
+    ) {
+        service.configureGroup(userDetails.getUser(), data);
         return Result.ok();
     }
 
@@ -71,8 +79,12 @@ public class GroupController {
 
     @Operation(summary = "Удалить группу (со всеми привычками)")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteGroup(@PathVariable Long id) {
-        service.deleteGroup(id);
+    public Result<Void> deleteGroup(
+            @AuthenticationPrincipal
+            UserDetailsInfo userDetails,
+            @PathVariable Long id
+    ) {
+        service.deleteGroup(userDetails.getUser(), id);
         return Result.ok();
     }
 }
