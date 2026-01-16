@@ -150,6 +150,9 @@ public class RecordService {
                 .habitId(habit.getId())
                 .recordDate(date)
                 .build();
+        if (value == null) {
+            //todo delete record
+        }
         switch (habit.getType()) {
             case GENERAL -> {
                 booleanRecordRepository.save(BooleanRecord.builder().id(id).user(user).habit(habit).payload((Boolean) value).build());
