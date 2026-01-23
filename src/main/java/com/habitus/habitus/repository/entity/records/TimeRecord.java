@@ -15,7 +15,7 @@ public class TimeRecord extends RecordInfo {
     private LocalTime payload;
 
     @Override
-    public Object getPayload() {
+    public LocalTime getPayload() {
         return payload;
     }
 }

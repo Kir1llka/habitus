@@ -13,7 +13,7 @@ public class NumberRecord extends RecordInfo {
     private Double payload;
 
     @Override
-    public Object getPayload() {
+    public Double getPayload() {
         return payload;
     }
 }

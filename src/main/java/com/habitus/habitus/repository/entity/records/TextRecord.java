@@ -13,7 +13,7 @@ public class TextRecord extends RecordInfo {
     private String payload;
 
     @Override
-    public Object getPayload() {
+    public String getPayload() {
         return payload;
     }
 }

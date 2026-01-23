@@ -13,7 +13,7 @@ public class BooleanRecord extends RecordInfo {
     private Boolean payload;
 
     @Override
-    public Object getPayload() {
+    public Boolean getPayload() {
         return payload;
     }
 }

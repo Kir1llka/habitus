@@ -1,5 +1,7 @@
 package com.habitus.habitus.repository.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,8 +16,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "habit_stats")
@@ -44,4 +49,18 @@ public class HabitStats {
     private Integer maxMiss;
     private Integer currentStreak;
     private Integer currentMiss;
+
+    private Double max;
+    private Double min;
+    private Double avg;
+    private Double sum;
+
+    private LocalTime maxTime;
+    private LocalTime minTime;
+    private Long avgTime;
+    private Long sumTime;
+
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Long> topValues;
 }

@@ -39,7 +39,6 @@ public class HabitService {
                 .stats(HabitStats.builder()
                         .completion(0)
                         .completionCount(0)
-                        .weekCompletion(0)
                         .maxStreak(0)
                         .maxMiss(0)
                         .currentStreak(0)
