@@ -2,8 +2,6 @@ package com.habitus.habitus.service;
 
 import com.github.javafaker.Faker;
 import com.habitus.habitus.api.group.GroupData;
-import com.habitus.habitus.api.records.data.DayData;
-import com.habitus.habitus.api.records.data.DayRecordData;
 import com.habitus.habitus.api.records.data.GroupsResponse;
 import com.habitus.habitus.api.records.data.PutRecordBody;
 import com.habitus.habitus.api.records.data.RecordData;
@@ -34,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -65,17 +62,22 @@ public class RecordService {
         );
     }
 
+    public List<RecordData> getHabitRecords(UserInfo user, Long habitId, LocalDate startDate, LocalDate endDate) {
+        var habit = habitRepository.findByIdAndOwner(habitId, user).orElseThrow();
+        return getFullRecordsData(getRecords(habit, startDate, endDate), startDate, endDate);
+    }
+
     private GroupData getGroupData(HabitGroup group, LocalDate startDate, LocalDate endDate) {
         return GroupService.toGroupData(
                 group,
                 group.getHabits().stream()
-                        .map(h -> HabitService.toHabitData(h, getFullRecordsData(h, startDate, endDate)))
+                        .map(h -> HabitService.toHabitData(h, getFullRecordsData(h.getRecords(), startDate, endDate)))
                         .toList()
         );
     }
 
-    private static List<RecordData> getFullRecordsData(Habit habit, LocalDate startDate, LocalDate endDate) {
-        var map = habit.getRecords().stream()
+    private static List<RecordData> getFullRecordsData(List<RecordInfo> records, LocalDate startDate, LocalDate endDate) {
+        var map = records.stream()
                 .map(RecordService::toRecordData)
                 .collect(Collectors.toMap(RecordData::getDate, Function.identity()));
         return Stream.iterate(
@@ -92,31 +94,6 @@ public class RecordService {
                 .date(recordInfo.getId().getRecordDate())
                 .value(recordInfo.getPayload())
                 .build();
-    }
-
-    public List<DayData> getDaysData(UserInfo user, LocalDate startDate, LocalDate endDate) {
-        var groups = getRecordsBetweenDates(user, startDate, endDate);
-
-        List<DayData> result = new ArrayList<>();
-        var habits = groups.stream()
-                .flatMap(g -> g.getHabits().stream())
-                .toList();
-
-        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-            var d = LocalDate.ofEpochDay(date.toEpochDay());
-            List<DayRecordData> recs = new ArrayList<>();
-            for (Habit habit : habits) {
-                var value = habit.getRecords().stream()
-                        .filter(r -> r.getId().getRecordDate().equals(d))
-                        .findFirst()
-                        .map(RecordInfo::getPayload)
-                        .orElse(null);
-                recs.add(DayRecordData.builder().habitId(habit.getId()).value(value).build());
-            }
-            result.add(new DayData(date, recs));
-        }
-
-        return result;
     }
 
     private List<HabitGroup> getRecordsBetweenDates(UserInfo user, LocalDate startDate, LocalDate endDate) {

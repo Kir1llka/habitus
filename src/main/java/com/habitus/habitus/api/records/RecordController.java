@@ -1,10 +1,9 @@
 package com.habitus.habitus.api.records;
 
 import com.habitus.habitus.api.Result;
-import com.habitus.habitus.api.group.GroupData;
-import com.habitus.habitus.api.records.data.DayData;
 import com.habitus.habitus.api.records.data.GroupsResponse;
 import com.habitus.habitus.api.records.data.PutRecordBody;
+import com.habitus.habitus.api.records.data.RecordData;
 import com.habitus.habitus.security.UserDetailsInfo;
 import com.habitus.habitus.service.RecordService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +45,26 @@ public class RecordController {
         return Result.ok(recordService.getGroupsData(userDetails.getUser(), startDate, endDate));
     }
 
+    @Operation(summary = "Получить записи привычки по айди в диапазоне дат")
+    @GetMapping("/habit")
+    public Result<List<RecordData>> getHabitRecords(
+            @AuthenticationPrincipal
+            UserDetailsInfo userDetails,
+
+            @RequestParam("habitId")
+            Long habitId,
+
+            @RequestParam("startDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate startDate,
+
+            @RequestParam("endDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate endDate
+    ) {
+        return Result.ok(recordService.getHabitRecords(userDetails.getUser(), habitId, startDate, endDate));
+    }
+
     @Operation(summary = "Получить все группы привычек со всеми записями за определенный день")
     @GetMapping("day")
     public Result<GroupsResponse> getDay(
@@ -57,23 +76,6 @@ public class RecordController {
             LocalDate date
     ) {
         return Result.ok(recordService.getGroupsData(userDetails.getUser(), date, date));
-    }
-
-    @Operation(summary = "Получить дни с записями")
-    @GetMapping("/days")
-    public Result<List<DayData>> getDays(
-            @AuthenticationPrincipal
-            UserDetailsInfo userDetails,
-
-            @RequestParam("startDate")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate startDate,
-
-            @RequestParam("endDate")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate endDate
-    ) {
-        return Result.ok(recordService.getDaysData(userDetails.getUser(), startDate, endDate));
     }
 
     @Operation(summary = "Добавить/обновить запись привычки за конкретную дату")
