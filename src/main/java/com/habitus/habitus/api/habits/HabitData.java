@@ -6,6 +6,7 @@ import com.habitus.habitus.repository.entity.HabitType;
 import com.habitus.habitus.repository.entity.ScheduleType;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.jdbc.core.SqlReturnType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,5 +24,6 @@ public class HabitData {
     private Integer scheduleN;
     private boolean hidden;
     private int position;
+    private List<String> motivations;
     private List<RecordData> records;
 }

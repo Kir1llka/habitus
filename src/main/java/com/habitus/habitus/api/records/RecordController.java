@@ -65,7 +65,7 @@ public class RecordController {
         return Result.ok(recordService.getHabitRecords(userDetails.getUser(), habitId, startDate, endDate));
     }
 
-    @Operation(summary = "Получить все группы привычек со всеми записями за определенный день")
+    @Operation(summary = "Получить все группы привычек со всеми записями за определенный день для дашборда")
     @GetMapping("day")
     public Result<GroupsResponse> getDay(
             @AuthenticationPrincipal
@@ -75,7 +75,7 @@ public class RecordController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date
     ) {
-        return Result.ok(recordService.getGroupsData(userDetails.getUser(), date, date));
+        return Result.ok(recordService.getGroupsData(userDetails.getUser(), date, date, date.isEqual(LocalDate.now())));
     }
 
     @Operation(summary = "Добавить/обновить запись привычки за конкретную дату")

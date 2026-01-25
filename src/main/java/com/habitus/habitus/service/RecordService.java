@@ -54,10 +54,14 @@ public class RecordService {
     private TimeRecordRepository timeRecordRepository;
 
     public GroupsResponse getGroupsData(UserInfo user, LocalDate startDate, LocalDate endDate) {
+        return getGroupsData(user, startDate, endDate, false);
+    }
+
+    public GroupsResponse getGroupsData(UserInfo user, LocalDate startDate, LocalDate endDate, boolean addMotivations) {
         return new GroupsResponse(
                 Stream.iterate(startDate, date -> !date.isAfter(endDate), date -> date.plusDays(1)).toList(),
-                getRecordsBetweenDates(user, startDate, endDate).stream()
-                        .map(g -> getGroupData(g, startDate, endDate))
+                getGroupsWithRecordsInPeriod(user, startDate, endDate).stream()
+                        .map(g -> getGroupData(g, startDate, endDate, addMotivations))
                         .toList()
         );
     }
@@ -67,11 +71,17 @@ public class RecordService {
         return getFullRecordsData(getRecords(habit, startDate, endDate), startDate, endDate);
     }
 
-    private GroupData getGroupData(HabitGroup group, LocalDate startDate, LocalDate endDate) {
+    private GroupData getGroupData(HabitGroup group, LocalDate startDate, LocalDate endDate, boolean addMotivations) {
         return GroupService.toGroupData(
                 group,
                 group.getHabits().stream()
-                        .map(h -> HabitService.toHabitData(h, getFullRecordsData(h.getRecords(), startDate, endDate)))
+                        .map(h -> HabitService.toHabitData(
+                                h,
+                                getFullRecordsData(h.getRecords(), startDate, endDate),
+                                addMotivations ? statsService.getMotivations(h, h.getRecords().stream()
+                                        .map(RecordInfo::getPayload)
+                                        .findFirst().orElse(null)) : null
+                        ))
                         .toList()
         );
     }
@@ -96,7 +106,7 @@ public class RecordService {
                 .build();
     }
 
-    private List<HabitGroup> getRecordsBetweenDates(UserInfo user, LocalDate startDate, LocalDate endDate) {
+    private List<HabitGroup> getGroupsWithRecordsInPeriod(UserInfo user, LocalDate startDate, LocalDate endDate) {
         var showHidden = user.getSettings().isShowHidden();
         List<HabitGroup> groups = habitGroupRepository.findByOwner(user)
                 .stream()

@@ -75,10 +75,14 @@ public class HabitService {
     }
 
     public static HabitData toHabitData(Habit habit) {
-        return toHabitData(habit, null);
+        return toHabitData(habit, null, null);
     }
 
     public static HabitData toHabitData(Habit habit, List<RecordData> records) {
+        return toHabitData(habit, records, null);
+    }
+
+    public static HabitData toHabitData(Habit habit, List<RecordData> records, List<String> motivations) {
         return HabitData.builder()
                 .id(habit.getId())
                 .name(habit.getName())
@@ -89,6 +93,7 @@ public class HabitService {
                 .scheduleN(habit.getScheduleN())
                 .hidden(habit.isHidden())
                 .position(habit.getPosition())
+                .motivations(motivations)
                 .records(records)
                 .build();
     }
