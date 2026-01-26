@@ -25,14 +25,12 @@ public class GroupService {
     private HabitRepository habitRepository;
 
     public List<GroupData> getAllGroups(UserInfo user) {
-        return repository.findByOwner(user).stream()
+        return user.getGroups().stream()
                 .map(group ->
                         toGroupData(group, group.getHabits().stream()
-                                .sorted(Comparator.comparing(Habit::getPosition))
                                 .map(HabitService::toHabitData)
                                 .toList())
                 )
-                .sorted(Comparator.comparing(GroupData::getPosition))
                 .toList();
     }
 
@@ -41,28 +39,25 @@ public class GroupService {
         return toGroupData(
                 group,
                 group.getHabits().stream()
-                        .sorted(Comparator.comparing(Habit::getPosition))
                         .map(HabitService::toHabitData)
                         .toList()
         );
     }
 
     public void addGroup(UserInfo user, NewGroupData data) {
-        var groups = repository.findByOwner(user);
         var group = HabitGroup.builder()
                 .name(data.getName())
                 .startDate(LocalDate.now())
                 .color(data.getColor())
                 .owner(user)
-                .position(groups.size())
+                .position(user.getGroups().size())
                 .build();
         repository.save(group);
     }
 
     @Transactional
     public void reorderGroups(UserInfo user, List<Long> orderedIds) {
-        var groups = repository.findByOwner(user);
-        if (orderedIds.size() != groups.size()) throw new IllegalArgumentException("Не верная длинна массива orderedIds");
+        if (orderedIds.size() != user.getGroups().size()) throw new IllegalArgumentException("Не верная длинна массива orderedIds");
         for (int i = 0; i < orderedIds.size(); i++) {
             repository.updatePosition(orderedIds.get(i), i);
         }

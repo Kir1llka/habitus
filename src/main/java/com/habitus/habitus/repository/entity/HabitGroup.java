@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,5 +58,6 @@ public class HabitGroup {
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @OrderBy("position ASC")
     private List<Habit> habits = new ArrayList<>();
 }

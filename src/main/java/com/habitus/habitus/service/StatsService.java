@@ -1,6 +1,7 @@
 package com.habitus.habitus.service;
 
 import com.habitus.habitus.repository.BooleanRecordRepository;
+import com.habitus.habitus.repository.HabitRepository;
 import com.habitus.habitus.repository.HabitStatsRepository;
 import com.habitus.habitus.repository.NumberRecordRepository;
 import com.habitus.habitus.repository.TextRecordRepository;

@@ -29,6 +29,7 @@ import com.habitus.habitus.security.UserInfo;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,6 +40,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.habitus.habitus.service.GroupService.toGroupData;
+import static com.habitus.habitus.service.HabitService.toHabitData;
 
 @Service
 @AllArgsConstructor
@@ -60,33 +64,17 @@ public class RecordService {
     public GroupsResponse getGroupsData(UserInfo user, LocalDate startDate, LocalDate endDate, boolean addMotivations) {
         return new GroupsResponse(
                 Stream.iterate(startDate, date -> !date.isAfter(endDate), date -> date.plusDays(1)).toList(),
-                getGroupsWithRecordsInPeriod(user, startDate, endDate).stream()
-                        .map(g -> getGroupData(g, startDate, endDate, addMotivations))
-                        .toList()
+                getGroupsWithRecordsInPeriod(user, startDate, endDate, addMotivations)
         );
     }
 
     public List<RecordData> getHabitRecords(UserInfo user, Long habitId, LocalDate startDate, LocalDate endDate) {
         var habit = habitRepository.findByIdAndOwner(habitId, user).orElseThrow();
-        return getFullRecordsData(getRecords(habit, startDate, endDate), startDate, endDate);
+        return getFullRecordsData(habit, startDate, endDate);
     }
 
-    private GroupData getGroupData(HabitGroup group, LocalDate startDate, LocalDate endDate, boolean addMotivations) {
-        return GroupService.toGroupData(
-                group,
-                group.getHabits().stream()
-                        .map(h -> HabitService.toHabitData(
-                                h,
-                                getFullRecordsData(h.getRecords(), startDate, endDate),
-                                addMotivations ? statsService.getMotivations(h, h.getRecords().stream()
-                                        .map(RecordInfo::getPayload)
-                                        .findFirst().orElse(null)) : null
-                        ))
-                        .toList()
-        );
-    }
-
-    private static List<RecordData> getFullRecordsData(List<RecordInfo> records, LocalDate startDate, LocalDate endDate) {
+    private List<RecordData> getFullRecordsData(Habit habit, LocalDate startDate, LocalDate endDate) {
+        var records = getRecords(habit, startDate, endDate);
         var map = records.stream()
                 .map(RecordService::toRecordData)
                 .collect(Collectors.toMap(RecordData::getDate, Function.identity()));
@@ -106,24 +94,23 @@ public class RecordService {
                 .build();
     }
 
-    private List<HabitGroup> getGroupsWithRecordsInPeriod(UserInfo user, LocalDate startDate, LocalDate endDate) {
+    private List<GroupData> getGroupsWithRecordsInPeriod(UserInfo user, LocalDate startDate, LocalDate endDate, boolean addMotivations) {
         var showHidden = user.getSettings().isShowHidden();
-        List<HabitGroup> groups = habitGroupRepository.findByOwner(user)
-                .stream()
-                .filter(g -> showHidden || !g.isHidden())
-                .sorted(Comparator.comparing(HabitGroup::getPosition))
+        return habitGroupRepository.findAllForUser(user, showHidden).stream()
+                .map(g -> {
+                    var habits = habitRepository.findAllForGroup(g, showHidden).stream()
+                            .map(h -> {
+                                var recordsData = getFullRecordsData(h, startDate, endDate);
+                                return toHabitData(
+                                        h,
+                                        recordsData,
+                                        addMotivations ? statsService.getMotivations(h, recordsData.get(0).getValue()) : null
+                                );
+                            })
+                            .toList();
+                    return toGroupData(g, habits);
+                })
                 .toList();
-
-        groups.forEach(g -> g.setHabits(g.getHabits().stream()
-                .filter(h -> showHidden || !h.isHidden())
-                .sorted(Comparator.comparing(Habit::getPosition))
-                .toList()));
-
-        groups.stream()
-                .flatMap(g -> g.getHabits().stream())
-                .forEach(habit -> habit.setRecords(getRecords(habit, startDate, endDate)));
-
-        return groups;
     }
 
     public void putRecord(UserInfo user, PutRecordBody body) {
@@ -193,8 +180,7 @@ public class RecordService {
 
     public void restoreDemoData() {
         var admin = userDetailsService.loadUserByUsername("admin").getUser();
-        var groups = habitGroupRepository.findByOwner(admin);
-        habitGroupRepository.deleteAll(groups);
+        habitGroupRepository.deleteAll(admin.getGroups());
 
         createDemoData();
     }

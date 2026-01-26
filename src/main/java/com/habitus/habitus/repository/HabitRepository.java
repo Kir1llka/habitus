@@ -17,7 +17,17 @@ public interface HabitRepository extends JpaRepository<Habit, Long> {
 
     Optional<Habit> findByIdAndOwner(Long id, UserInfo owner);
 
-    List<Habit> findByGroup(HabitGroup group);
+    @Query("""
+                select h
+                from Habit h
+                where h.group = :group
+                  and (:showHidden = true or h.hidden = false)
+                order by h.position
+            """)
+    List<Habit> findAllForGroup(
+            HabitGroup group,
+            boolean showHidden
+    );
 
     @Modifying
     @Query("UPDATE Habit h SET h.position = :position WHERE h.id = :id")
