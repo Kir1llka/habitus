@@ -55,13 +55,6 @@ public class UserInfo {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserSettings settings;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OrderBy("position ASC")
-    private List<HabitGroup> groups = new ArrayList<>();
-
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)

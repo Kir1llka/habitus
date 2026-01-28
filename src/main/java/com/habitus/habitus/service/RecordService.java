@@ -87,7 +87,7 @@ public class RecordService {
                 .toList();
     }
 
-    private static RecordData toRecordData(RecordInfo recordInfo) {
+    public static RecordData toRecordData(RecordInfo recordInfo) {
         return RecordData.builder()
                 .date(recordInfo.getId().getRecordDate())
                 .value(recordInfo.getPayload())
@@ -118,7 +118,7 @@ public class RecordService {
         saveRecord(user, habit, body.getDate(), body.getValue());
     }
 
-    private void saveRecord(UserInfo user, Habit habit, LocalDate date, Object value) {
+    public void saveRecord(UserInfo user, Habit habit, LocalDate date, Object value) {
         var id = RecordId.builder()
                 .userId(user.getId())
                 .habitId(habit.getId())
@@ -180,7 +180,7 @@ public class RecordService {
 
     public void restoreDemoData() {
         var admin = userDetailsService.loadUserByUsername("admin").getUser();
-        habitGroupRepository.deleteAll(admin.getGroups());
+        habitGroupRepository.deleteAll(habitGroupRepository.findByOwner(admin));
 
         createDemoData();
     }

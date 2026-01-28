@@ -6,7 +6,6 @@ import com.habitus.habitus.api.group.NewGroupData;
 import com.habitus.habitus.api.habits.HabitData;
 import com.habitus.habitus.repository.HabitGroupRepository;
 import com.habitus.habitus.repository.HabitRepository;
-import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitGroup;
 import com.habitus.habitus.security.UserInfo;
 import lombok.AllArgsConstructor;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -25,7 +23,7 @@ public class GroupService {
     private HabitRepository habitRepository;
 
     public List<GroupData> getAllGroups(UserInfo user) {
-        return user.getGroups().stream()
+        return repository.findByOwnerOrderByPosition(user).stream()
                 .map(group ->
                         toGroupData(group, group.getHabits().stream()
                                 .map(HabitService::toHabitData)
@@ -50,14 +48,14 @@ public class GroupService {
                 .startDate(LocalDate.now())
                 .color(data.getColor())
                 .owner(user)
-                .position(user.getGroups().size())
+                .position(repository.findByOwner(user).size())
                 .build();
         repository.save(group);
     }
 
     @Transactional
     public void reorderGroups(UserInfo user, List<Long> orderedIds) {
-        if (orderedIds.size() != user.getGroups().size()) throw new IllegalArgumentException("Не верная длинна массива orderedIds");
+        if (orderedIds.size() != repository.findByOwner(user).size()) throw new IllegalArgumentException("Не верная длинна массива orderedIds");
         for (int i = 0; i < orderedIds.size(); i++) {
             repository.updatePosition(orderedIds.get(i), i);
         }

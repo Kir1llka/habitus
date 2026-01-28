@@ -17,6 +17,7 @@ public interface HabitGroupRepository extends JpaRepository<HabitGroup, Long> {
     Optional<HabitGroup> findByIdAndOwner(Long id, UserInfo owner);
 
     List<HabitGroup> findByOwner(UserInfo owner);
+    List<HabitGroup> findByOwnerOrderByPosition(UserInfo owner);
 
     @Query("""
                 select g
