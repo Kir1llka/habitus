@@ -2,8 +2,7 @@ package com.habitus.habitus.api;
 
 import com.habitus.habitus.security.Role;
 import com.habitus.habitus.security.UserDetailsInfo;
-import com.habitus.habitus.security.UserRepository;
-import com.habitus.habitus.service.RecordService;
+import com.habitus.habitus.service.DemoService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,8 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/test")
 @AllArgsConstructor
 public class TestController {
-    private UserRepository userRepository;
-    private RecordService recordService;
+    private DemoService demoService;
 
     @Operation(summary = "Просто пинг сервера")
     @GetMapping()
@@ -35,7 +33,7 @@ public class TestController {
     public void restore(@AuthenticationPrincipal UserDetailsInfo user) {
 
         if (user.getUser().getRoles().contains(Role.ADMIN)) {
-            recordService.restoreDemoData();
+            demoService.restoreDemoData();
         }
 
     }

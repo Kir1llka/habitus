@@ -25,9 +25,9 @@ import java.util.Map;
 @Entity
 @Table(name = "habit_stats")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class HabitStats {
 
     @Id

@@ -20,7 +20,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.apache.catalina.User;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -55,7 +56,8 @@ public class Habit {
     private ScheduleType schedule;
     private Integer scheduleN;
 
-    @OneToOne(mappedBy = "habit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Fetch(FetchMode.JOIN)
+    @OneToOne(mappedBy = "habit", cascade = CascadeType.ALL, orphanRemoval = true)
     private HabitStats stats;
 
     @ManyToOne(fetch = FetchType.LAZY)
