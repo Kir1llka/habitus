@@ -129,7 +129,8 @@ public class StatsService {
     }
 
     public List<String> getMotivations(Habit habit, Object value) {
-        var stats = habit.getStats().getLastUpdate().isBefore(LocalDate.now()) ? updateStats(habit) : habit.getStats();
+        var stats = habit.getEldestDate() != null && habit.getStats().getLastUpdate().isBefore(LocalDate.now()) ?
+                updateStats(habit) : habit.getStats();
         var list = new ArrayList<String>();
 
 
