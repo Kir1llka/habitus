@@ -30,9 +30,9 @@ import java.util.List;
 @Entity
 @Table(name = "habits")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Habit {
 
     @Id

@@ -3,6 +3,7 @@ package com.habitus.habitus.service;
 import com.github.javafaker.Faker;
 import com.habitus.habitus.repository.HabitGroupRepository;
 import com.habitus.habitus.repository.HabitRepository;
+import com.habitus.habitus.repository.HabitStatsRepository;
 import com.habitus.habitus.repository.entity.Habit;
 import com.habitus.habitus.repository.entity.HabitGroup;
 import com.habitus.habitus.repository.entity.HabitStats;
@@ -16,6 +17,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -43,6 +45,7 @@ public class DemoService {
     }
 
     @PostConstruct
+    @Transactional
     public void createDemoData() {
         Faker faker = new Faker(new Random(24));
 
@@ -78,14 +81,8 @@ public class DemoService {
                 habit.setStartDate(LocalDate.of(2025, 10, 1));
                 habit.setSchedule(ScheduleType.EVERYDAY);
                 habit.setStats(HabitStats.builder()
-                        .completion(0)
-                        .completionCount(0)
-                        .maxStreak(0)
-                        .maxMiss(0)
-                        .currentStreak(0)
-                        .currentMiss(0)
+                        .habit(habit)
                         .build());
-                habit.getStats().setHabit(habit);
 
                 var type = HabitType.GENERAL;
                 if (i == 2) type = HabitType.NUMBER;

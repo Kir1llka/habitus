@@ -17,6 +17,8 @@ spring:
     username: habitus_user
     password: habitus_pass
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 3000 # 3 секунды
   jpa:
     hibernate:
       ddl-auto: update
