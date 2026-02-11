@@ -42,11 +42,15 @@ public class StatsService {
     private NumberRecordRepository numberRecordRepository;
     private TimeRecordRepository timeRecordRepository;
 
+    public HabitStats checkAndUpdateStats(Habit habit) {
+        boolean needUpdate = habit.getStats().getLastUpdate() == null ||
+                habit.getStats().getLastUpdate().isBefore(LocalDate.now());
+
+        return needUpdate ? updateStats(habit) : habit.getStats();
+    }
+
     public HabitStats updateStats(Habit habit) {
-        if (habit.getEldestDate() == null) return habit.getStats();
-
         var stats = getStats(habit, habit.getStartDate(), LocalDate.now());
-
         saveStats(habit, stats);
         return stats;
     }
@@ -129,8 +133,7 @@ public class StatsService {
     }
 
     public List<String> getMotivations(Habit habit, Object value) {
-        var stats = habit.getEldestDate() != null && habit.getStats().getLastUpdate().isBefore(LocalDate.now()) ?
-                updateStats(habit) : habit.getStats();
+        var stats = checkAndUpdateStats(habit);
         var list = new ArrayList<String>();
 
 

@@ -35,8 +35,7 @@ public class HabitStatsController {
             @PathVariable Long id
     ) {
         var habit = repository.findByIdAndOwner(id, user.getUser()).orElseThrow();
-        var stats = habit.getStats().getLastUpdate() == null || habit.getStats().getLastUpdate().isBefore(LocalDate.now()) ?
-                service.updateStats(habit) : habit.getStats();
+        var stats = service.checkAndUpdateStats(habit);
         return Result.ok(toHabitStatsData(stats));
     }
 
