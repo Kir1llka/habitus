@@ -1,7 +1,6 @@
 package com.habitus.habitus.service;
 
 import com.habitus.habitus.repository.BooleanRecordRepository;
-import com.habitus.habitus.repository.HabitRepository;
 import com.habitus.habitus.repository.HabitStatsRepository;
 import com.habitus.habitus.repository.NumberRecordRepository;
 import com.habitus.habitus.repository.TextRecordRepository;
@@ -24,11 +23,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -130,55 +127,6 @@ public class StatsService {
             stats.setTopValues(strings);
         }
         return stats;
-    }
-
-    public List<String> getMotivations(Habit habit, Object value) {
-        var stats = checkAndUpdateStats(habit);
-        var list = new ArrayList<String>();
-
-
-        if (value != null) {
-            //streaks
-            if (stats.getCurrentStreak() >= 3) list.add("%d подряд!".formatted(stats.getCurrentStreak()));
-            if (stats.getCurrentStreak().equals(stats.getMaxStreak())) list.add("Рекордный стрик!");
-            if (stats.getCurrentStreak() == 1 && stats.getMaxMiss() > 0) list.add("С возвращением!");
-
-            //counts
-            if (stats.getCompletionCount() == 1) list.add("Отличное начало!");
-            if (stats.getCompletionCount() == 10) list.add("Первая десятка");
-            if (stats.getCompletionCount() == 100) list.add("Первая сотня");
-            if (stats.getCompletionCount() == 1000) list.add("Первая тысяча");
-
-            if (habit.getType() == HabitType.NUMBER) {
-                var num = (Double) value;
-                if (Objects.equals(stats.getMax(), num)) list.add("Новый рекорд!");
-                if (Objects.equals(stats.getMin(), num)) list.add("Самое маленькое");
-                if (stats.getSum() > 100 && stats.getSum() - num < 100) list.add("В сумме 100+");
-                if (stats.getSum() > 1000 && stats.getSum() - num < 1000) list.add("В сумме 1000+");
-                if (list.size() < 3 && stats.getAvg() < num) list.add("Лучше, чем обычно!");
-            }
-
-            if (habit.getType() == HabitType.TIME) {
-                var time = (LocalTime) value;
-                if (Objects.equals(stats.getMaxTime(), time)) list.add("Новый рекорд!");
-                if (Objects.equals(stats.getMinTime(), time)) list.add("Самое быстрое");
-                var sum = Duration.ofSeconds(stats.getSumTime());
-                if (sum.toHours() > 100 && sum.minusSeconds(time.toSecondOfDay()).toHours() < 100) list.add("В сумме 100+");
-                if (sum.toHours() > 1000 && sum.minusSeconds(time.toSecondOfDay()).toHours() < 1000) list.add("В сумме 1000+");
-                if (list.size() < 3 && stats.getAvgTime() < Duration.ofSeconds(time.toSecondOfDay()).toSeconds()) list.add("Лучше, чем обычно!");
-            }
-        } else {
-            //streaks
-            if (stats.getCurrentStreak() >= 3) list.add("Выполнено %d подряд".formatted(stats.getCurrentStreak()));
-            if (stats.getCurrentStreak().equals(stats.getMaxStreak())) list.add("Рекордный стрик!");
-            if (stats.getCurrentStreak() == 1 && stats.getMaxMiss() > 0) list.add("Давай еще!");
-
-            //miss
-            if (stats.getCurrentMiss() >= 3) list.add("%d пропуска подряд =(".formatted(stats.getCurrentStreak()));
-            if (stats.getCurrentMiss().equals(stats.getMaxMiss())) list.add("Антирекорд =(");
-        }
-
-        return list;
     }
 
     private RecordsData getRecordsData(Habit habit, LocalDate startDate, LocalDate endDate) {

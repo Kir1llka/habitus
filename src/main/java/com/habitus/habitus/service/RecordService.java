@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ import static com.habitus.habitus.service.HabitService.toHabitData;
 public class RecordService {
 
     private StatsService statsService;
+    private MotivationsService motivationsService;
     private HabitGroupRepository habitGroupRepository;
     private HabitRepository habitRepository;
     private BooleanRecordRepository booleanRecordRepository;
@@ -90,7 +92,7 @@ public class RecordService {
                                 return toHabitData(
                                         h,
                                         recordsData,
-                                        addMotivations ? statsService.getMotivations(h, recordsData.get(0).getValue()) : null
+                                        addMotivations ? motivationsService.getMotivations(h, recordsData.get(0).getValue()) : new ArrayList<>()
                                 );
                             })
                             .toList();

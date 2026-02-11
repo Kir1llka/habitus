@@ -24,6 +24,6 @@ public class HabitData {
     private Integer scheduleN;
     private boolean hidden;
     private int position;
-    private List<String> motivations;
+    private List<MotivationsData> motivations;
     private List<RecordData> records;
 }

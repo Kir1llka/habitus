@@ -2,6 +2,7 @@ package com.habitus.habitus.service;
 
 import com.habitus.habitus.api.habits.ConfigureHabitData;
 import com.habitus.habitus.api.habits.HabitData;
+import com.habitus.habitus.api.habits.MotivationsData;
 import com.habitus.habitus.api.habits.NewHabitData;
 import com.habitus.habitus.api.records.data.RecordData;
 import com.habitus.habitus.repository.HabitGroupRepository;
@@ -11,10 +12,12 @@ import com.habitus.habitus.repository.entity.HabitStats;
 import com.habitus.habitus.repository.entity.HabitType;
 import com.habitus.habitus.repository.entity.ScheduleType;
 import com.habitus.habitus.security.UserInfo;
+import com.habitus.habitus.service.MotivationsService.Motivation;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -75,14 +78,14 @@ public class HabitService {
     }
 
     public static HabitData toHabitData(Habit habit) {
-        return toHabitData(habit, null, null);
+        return toHabitData(habit, null, new ArrayList<>());
     }
 
     public static HabitData toHabitData(Habit habit, List<RecordData> records) {
-        return toHabitData(habit, records, null);
+        return toHabitData(habit, records, new ArrayList<>());
     }
 
-    public static HabitData toHabitData(Habit habit, List<RecordData> records, List<String> motivations) {
+    public static HabitData toHabitData(Habit habit, List<RecordData> records, List<Motivation> motivations) {
         return HabitData.builder()
                 .id(habit.getId())
                 .name(habit.getName())
@@ -93,8 +96,12 @@ public class HabitService {
                 .scheduleN(habit.getScheduleN())
                 .hidden(habit.isHidden())
                 .position(habit.getPosition())
-                .motivations(motivations)
+                .motivations(motivations.stream().map(HabitService::toMotivationsData).toList())
                 .records(records)
                 .build();
+    }
+
+    public static MotivationsData toMotivationsData(Motivation motivation) {
+        return new MotivationsData(motivation.getNumber(), motivation.getType());
     }
 }
